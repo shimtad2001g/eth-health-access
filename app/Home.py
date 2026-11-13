@@ -28,7 +28,7 @@ st.set_page_config(
 # ==========================================
 # Creates a default config.yaml if it doesn't exist (Username: dispatcher, Password: password123)
 if not os.path.exists('config.yaml'):
-    hashed_password = stauth.Hasher(['password123']).generate()[0]
+    hashed_password = stauth.Hasher.hash('password123')
     config = {
         'credentials': {
             'usernames': {
