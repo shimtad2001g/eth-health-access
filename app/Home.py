@@ -18,12 +18,11 @@ st.set_page_config(
 # --- LOGO INTEGRATION ---
 if os.path.exists("assets/logo.png"):
     st.logo("assets/logo.png", size="large")
-    st.sidebar.image("assets/logo.png", use_container_width=True)
+    st.sidebar.image("assets/logo.png", width="stretch")
 else:
     st.sidebar.warning("⚠️ Logo missing! Check assets/logo.png")
 
-# --- MOCK DATABASES (In production, connect to PostgreSQL/Firebase) ---
-# 1. Hospital Capacity Database
+# --- MOCK DATABASES ---
 if 'hospital_db' not in st.session_state:
     st.session_state.hospital_db = {
         "Black Lion Hospital": {"beds": 5, "icu": 2, "status": "Available"},
@@ -32,7 +31,6 @@ if 'hospital_db' not in st.session_state:
         "Yekatit 12": {"beds": 3, "icu": 0, "status": "Available"}
     }
 
-# 2. Fleet Management Database (Simulated GPS coordinates)
 if 'ambulances' not in st.session_state:
     st.session_state.ambulances = [
         {"id": "AMB-01", "lat": 9.020, "lon": 38.750, "status": "Available"},
@@ -46,7 +44,6 @@ def load_data():
     try:
         return gpd.read_file('data/processed/facilities_addis.gpkg')
     except:
-        # Fallback mock data if file is missing
         return gpd.GeoDataFrame({
             'Name': ["22 Mazoria Clinic", "Black Lion Hospital", "St. Paul's Hospital"],
             'Type_Clean': ['Clinic', 'Hospital', 'Hospital'],
@@ -56,10 +53,10 @@ def load_data():
 gdf = load_data()
 
 # ==========================================
-# UI LAYOUT: TABS FOR THE COMMAND CENTER
+# UI LAYOUT
 # ==========================================
 st.title("🚑 EthioHealth Emergency Command Center")
-st.markdown("**Ministry of Health - Addis Ababa Pilot**")
+# (The Ministry of Health text has been completely removed)
 
 tab1, tab2, tab3 = st.tabs(["📡 Dispatch Simulator", "🏥 Hospital Capacity", "🧠 AI Triage"])
 
@@ -70,7 +67,6 @@ with tab1:
     with col1:
         st.header("Dispatch Simulator")
         
-        # AI Triage Integration: Pull severity from Tab 3
         current_triage = st.session_state.get('triage_level', 'Unknown')
         if current_triage != 'Unknown':
             st.info(f"Current Patient Triage: **{current_triage}**")
@@ -94,13 +90,12 @@ with tab1:
                 
         if st.button("🚨 Dispatch Ambulance", type="primary"):
             with st.spinner("Routing to nearest available hospital..."):
-                # Simulation: Dispatch logic
                 available_hospitals = [k for k, v in st.session_state.hospital_db.items() if v['beds'] > 0]
                 if available_hospitals:
                     assigned_hosp = random.choice(available_hospitals)
                     assigned_amb = "AMB-01"
                     st.session_state.ambulances[0]['status'] = f"En route to {assigned_hosp}"
-                    st.session_state.hospital_db[assigned_hosp]['beds'] -= 1 # Deduct bed
+                    st.session_state.hospital_db[assigned_hosp]['beds'] -= 1
                     
                     st.success(f"Dispatch Successful!")
                     st.write(f"**Ambulance:** {assigned_amb}")
@@ -110,25 +105,20 @@ with tab1:
                     st.error("CRITICAL: No hospital beds available in the network!")
 
     with col2:
-        # Map Layout
         m = folium.Map(location=[9.0116, 38.7878], zoom_start=12)
         
-        # Plot Clinics
         for _, row in clinics.iterrows():
             folium.CircleMarker([row.geometry.y, row.geometry.x], radius=4, color='blue', fill=True, popup=row['Name']).add_to(m)
             
-        # Plot Hospitals with Capacity Colors
         for _, row in gdf[gdf['Type_Clean'].isin(['Hospital', 'Health Center'])].iterrows():
-            # Check our mock database for capacity
             cap = st.session_state.hospital_db.get(row['Name'], {"beds": 10})['beds']
             color = 'green' if cap > 0 else 'red'
             folium.Marker([row.geometry.y, row.geometry.x], popup=f"{row['Name']} (Beds: {cap})", icon=folium.Icon(color=color, icon='plus', prefix='fa')).add_to(m)
             
-        # Plot Live Ambulances
         for amb in st.session_state.ambulances:
             folium.Marker([amb['lat'], amb['lon']], popup=amb['id'], icon=folium.Icon(color='orange', icon='ambulance', prefix='fa')).add_to(m)
 
-        st_folium(m, use_container_width=True, height=600)
+        st_folium(m, width="stretch", height=600)
 
 # --- TAB 2: HOSPITAL CAPACITY BOARD ---
 with tab2:
@@ -150,7 +140,6 @@ with tab2:
                 else:
                     st.error("🔴 Full")
             
-            # Update the mock database
             st.session_state.hospital_db[hosp_name]['beds'] = new_beds
             st.session_state.hospital_db[hosp_name]['icu'] = new_icu
             st.divider()
@@ -166,7 +155,6 @@ with tab3:
         submitted = st.form_submit_button("Calculate Triage Level")
         
         if submitted and symptoms:
-            # Simple Rule-Based AI Logic (In production, use an LLM like OpenAI)
             symptoms_lower = symptoms.lower()
             
             if any(word in symptoms_lower for word in ["chest pain", "breathing", "unconscious", "bleeding heavily", "stroke"]):
