@@ -12,9 +12,9 @@ import yaml
 from yaml.loader import SafeLoader
 import streamlit_authenticator as stauth
 from streamlit_autorefresh import st_autorefresh
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, DateTime
 from sqlalchemy.orm import declarative_base, sessionmaker
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -24,11 +24,10 @@ st.set_page_config(
 )
 
 # ==========================================
-# 1. SECURITY & AUTHENTICATION
+# 1. DATABASE & CONFIG SETUP
 # ==========================================
-# Creates a default config.yaml if it doesn't exist 
+# Creates a default config.yaml if it doesn't exist
 if not os.path.exists('config.yaml'):
-    # FIX 1: Use the new .hash() method
     hashed_password = stauth.Hasher.hash('password123')
     config = {
         'credentials': {
@@ -36,7 +35,8 @@ if not os.path.exists('config.yaml'):
                 'dispatcher': {
                     'email': 'dispatcher@ethiohealth.com',
                     'name': 'Admin Dispatcher',
-                    'password': hashed_password
+                    'password': hashed_password,
+                    'trial_end': (datetime.now() + timedelta(days=365)).isoformat()
                 }
             }
         },
@@ -48,30 +48,8 @@ if not os.path.exists('config.yaml'):
 with open('config.yaml') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
-authenticator = stauth.Authenticate(
-    config['credentials'],
-    config['cookie']['name'],
-    config['cookie']['key'],
-    config['cookie']['expiry_days']
-)
-
-# FIX 2: Use the new st.session_state login method
-authenticator.login()
-
-if st.session_state.get('authentication_status') is False:
-    st.error('Username/password is incorrect')
-    st.stop()
-elif st.session_state.get('authentication_status') is None:
-    st.warning('Please enter your username and password')
-    st.stop()
-    
-name = st.session_state.get('name')
-
-# ==========================================
-# 2. DATABASE SETUP (SQLAlchemy)
-# ==========================================
+# SQLAlchemy setup for dispatch logs
 DATABASE_URL = "sqlite:///ethio_health.db"
-
 engine = create_engine(DATABASE_URL, echo=False)
 Base = declarative_base()
 
@@ -90,7 +68,7 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 # ==========================================
-# 3. LOGO & SIDEBAR
+# 2. DEVELOPER INFO & SIDEBAR
 # ==========================================
 if os.path.exists("assets/logo.png"):
     st.logo("assets/logo.png", size="large")
@@ -98,13 +76,121 @@ if os.path.exists("assets/logo.png"):
 else:
     st.sidebar.warning("⚠️ Logo missing! Check assets/logo.png")
 
-authenticator.logout('Logout', 'sidebar')
-st.sidebar.markdown("---")
-openai_api_key = st.sidebar.text_input("OpenAI API Key (for AI Triage)", type="password")
-if openai_api_key:
-    client = OpenAI(api_key=openai_api_key)
+with st.sidebar.expander("ℹ️ About the Developer"):
+    st.markdown("""
+    **Developed by:** Shimeles Tadesse Zelelew
+    **Status:** Prototype / Not Patented yet.
+    This system is designed to save lives by optimizing emergency dispatch. 
+    
+    *Disclaimer: This is a pilot system. Do not use for actual emergency dispatch until fully certified by the Ministry of Health.*
+    """)
+    # Email link that opens compose window
+    st.markdown("[📧 Email Me](mailto:shimeles.tadesse@example.com?subject=EthioHealth%20System%20Inquiry&body=Hello%20Shimeles,%0A%0AI%20am%20interested%20in%20the%20EthioHealth%20System.)")
 
-# --- REAL-WORLD API: OSRM ROUTING ---
+st.sidebar.markdown("---")
+
+# ==========================================
+# 3. AUTHENTICATION & 48-HOUR DEMO LOGIC
+# ==========================================
+authenticator = stauth.Authenticate(
+    config['credentials'],
+    config['cookie']['name'],
+    config['cookie']['key'],
+    config['cookie']['expiry_days']
+)
+
+# Check for demo mode in URL params (e.g., ?demo=true&start=2026-11-13T12:00:00)
+query_params = st.query_params
+demo_mode = False
+time_remaining = None
+
+if query_params.get("demo") == "true" and query_params.get("start"):
+    try:
+        start_time = datetime.fromisoformat(query_params.get("start"))
+        elapsed = datetime.now() - start_time
+        if elapsed < timedelta(hours=48):
+            demo_mode = True
+            time_remaining = timedelta(hours=48) - elapsed
+        else:
+            st.error("Your 48-hour demo has expired. Please register below to continue.")
+            st.query_params.clear()
+    except:
+        st.query_params.clear()
+
+if not demo_mode:
+    # --- STANDARD AUTHENTICATION ---
+    authenticator.login()
+    
+    if st.session_state.get('authentication_status') is False:
+        st.error('Username/password is incorrect')
+    elif st.session_state.get('authentication_status') is None:
+        st.info('Please login or start a demo below.')
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("### Try the System")
+            if st.button("🚀 Start 48-Hour Free Demo", use_container_width=True):
+                now_str = datetime.now().isoformat()
+                st.query_params["demo"] = "true"
+                st.query_params["start"] = now_str
+                st.rerun()
+                
+        with col2:
+            st.markdown("### Register for 1-Month Trial")
+            with st.form("register_form"):
+                new_name = st.text_input("Full Name")
+                new_email = st.text_input("Official Email")
+                new_org = st.text_input("Organization (e.g., MoH, NGO)")
+                new_pass = st.text_input("Password", type="password")
+                agree = st.checkbox("I agree to use this system responsibly and ethically. I understand this is a pilot system.")
+                
+                if st.form_submit_button("Register Account"):
+                    if new_name and new_email and new_pass and agree:
+                        if new_name.lower() in config['credentials']['usernames']:
+                            st.error("Username/Name already exists.")
+                        else:
+                            hashed_pw = stauth.Hasher.hash(new_pass)
+                            trial_end = (datetime.now() + timedelta(days=30)).isoformat()
+                            
+                            # Add user to config
+                            config['credentials']['usernames'][new_name.lower()] = {
+                                'email': new_email,
+                                'name': new_name,
+                                'password': hashed_pw,
+                                'trial_end': trial_end
+                            }
+                            
+                            # Save to YAML
+                            with open('config.yaml', 'w') as file:
+                                yaml.dump(config, file, default_flow_style=False)
+                            
+                            st.success("Registration successful! You can now login. Your 1-month trial has started.")
+                    else:
+                        st.warning("Please fill all fields and agree to the ethical terms.")
+        
+    if not st.session_state.get('authentication_status') and not demo_mode:
+        st.stop() # Stop app if not logged in and not in demo mode
+
+# --- LOGGED IN / DEMO UI ---
+if demo_mode:
+    st.warning(f"⚠️ **DEMO MODE ACTIVE** - Time remaining: {str(time_remaining).split('.')[0]}. Data will not be saved. [Register here](#) to save data.")
+    name = "Demo User"
+else:
+    name = st.session_state.get('name')
+    authenticator.logout('Logout', 'sidebar')
+
+# Check Trial Expiration for logged-in users
+if not demo_mode and not st.session_state.get('authentication_status') == False:
+    user_data = config['credentials']['usernames'].get(st.session_state.get('username'))
+    if user_data and 'trial_end' in user_data:
+        trial_end = datetime.fromisoformat(user_data['trial_end'])
+        if datetime.now() > trial_end:
+            st.error("Your 1-month trial has expired. Please email the developer for full access.")
+            st.stop()
+
+# ==========================================
+# 4. APP LOGIC (OSRM, MAP, etc.)
+# ==========================================
 OSRM_URL = "http://router.project-osrm.org/route/v1/driving/"
 
 def get_route(orig_lon, orig_lat, dest_lon, dest_lat):
@@ -118,7 +204,6 @@ def get_route(orig_lon, orig_lat, dest_lon, dest_lat):
         pass
     return None
 
-# --- STATE & MOCK DATABASES ---
 if 'hospital_db' not in st.session_state:
     st.session_state.hospital_db = {
         "Black Lion Hospital": {"beds": 5, "icu": 2, "coords": [9.0200, 38.7600]},
@@ -158,15 +243,11 @@ def haversine(lat1, lon1, lat2, lon2):
     a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
     return R * (2 * math.atan2(math.sqrt(a), math.sqrt(1-a)))
 
-# ==========================================
-# UI LAYOUT
-# ==========================================
 st.title("🚑 EthioHealth Emergency Command Center")
 st.write(f"Welcome, **{name}**!")
 
 tab1, tab2, tab3 = st.tabs(["📡 Dispatch Simulator", "🏥 Hospital Capacity", "🧠 AI Triage"])
 
-# --- TAB 1: DISPATCH SIMULATOR & FLEET ---
 with tab1:
     col1, col2 = st.columns([1, 3])
     
@@ -205,17 +286,18 @@ with tab1:
                             st.session_state.sim_progress = 0.0
                             st.session_state.hospital_db[assigned_hosp]['beds'] -= 1
                             
-                            new_dispatch = Dispatch(
-                                caller_name=caller_name, 
-                                caller_phone=caller_phone, 
-                                clinic=selected_clinic, 
-                                ambulance=nearest_amb['id'], 
-                                hospital=assigned_hosp
-                            )
-                            session.add(new_dispatch)
-                            session.commit()
+                            if not demo_mode:
+                                new_dispatch = Dispatch(
+                                    caller_name=caller_name, 
+                                    caller_phone=caller_phone, 
+                                    clinic=selected_clinic, 
+                                    ambulance=nearest_amb['id'], 
+                                    hospital=assigned_hosp
+                                )
+                                session.add(new_dispatch)
+                                session.commit()
                             
-                            st.success("Dispatch Successful & Saved to DB!")
+                            st.success("Dispatch Successful!")
                             st.write(f"**Unit:** {nearest_amb['id']} | **ETA:** {route['duration']/60:.1f} mins")
                         else:
                             st.error("Routing failed.")
@@ -270,7 +352,6 @@ with tab1:
         folium.LayerControl().add_to(m)
         st_folium(m, width="stretch", height=600)
 
-# --- TAB 2: HOSPITAL CAPACITY BOARD ---
 with tab2:
     st.header("🏥 Real-Time Hospital Capacity Board")
     
@@ -293,25 +374,29 @@ with tab2:
     st.markdown("---")
     st.subheader("📋 Recent Dispatch Logs (From Database)")
     
-    logs = session.query(Dispatch).order_by(Dispatch.time.desc()).limit(10).all()
-    
-    if logs:
-        log_data = [{
-            "Time": l.time.strftime("%Y-%m-%d %H:%M"), 
-            "Caller": l.caller_name, 
-            "Phone": l.caller_phone, 
-            "Ambulance": l.ambulance, 
-            "Hospital": l.hospital
-        } for l in logs]
-        st.dataframe(pd.DataFrame(log_data), use_container_width=True)
+    if demo_mode:
+        st.info("Dispatch logs are disabled in Demo Mode. Register to save your data.")
     else:
-        st.info("No dispatches logged yet.")
+        logs = session.query(Dispatch).order_by(Dispatch.time.desc()).limit(10).all()
+        if logs:
+            log_data = [{
+                "Time": l.time.strftime("%Y-%m-%d %H:%M"), 
+                "Caller": l.caller_name, 
+                "Phone": l.caller_phone, 
+                "Ambulance": l.ambulance, 
+                "Hospital": l.hospital
+            } for l in logs]
+            st.dataframe(pd.DataFrame(log_data), use_container_width=True)
+        else:
+            st.info("No dispatches logged yet.")
 
-# --- TAB 3: AI CLINICAL TRIAGE ---
 with tab3:
     st.header("🧠 AI-Powered Triage & Decision Support")
+    openai_api_key = st.sidebar.text_input("OpenAI API Key (for AI Triage)", type="password")
     if not openai_api_key:
         st.warning("⚠️ Please enter your OpenAI API Key in the sidebar.")
+    else:
+        client = OpenAI(api_key=openai_api_key)
     
     with st.form("triage_form"):
         symptoms = st.text_area("Describe the primary complaint:")
