@@ -7,6 +7,8 @@ import pandas as pd
 import numpy as np
 import math
 import requests
+import sqlite3
+import time
 from openai import OpenAI
 
 # --- PAGE CONFIGURATION ---
@@ -15,6 +17,23 @@ st.set_page_config(
     page_icon="assets/logo.png", 
     layout="wide"
 )
+
+# --- DATABASE SETUP ---
+def init_db():
+    conn = sqlite3.connect('ethio_health.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS dispatches
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                  caller_name TEXT, 
+                  caller_phone TEXT, 
+                  clinic TEXT,
+                  ambulance TEXT, 
+                  hospital TEXT,
+                  time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+    conn.commit()
+    conn.close()
+
+init_db()
 
 # --- LOGO INTEGRATION ---
 if os.path.exists("assets/logo.png"):
@@ -41,7 +60,7 @@ def get_route(orig_lon, orig_lat, dest_lon, dest_lat):
         if data.get('code') == 'Ok':
             return data['routes'][0]
     except Exception as e:
-        st.error(f"Routing error: {e}")
+        pass
     return None
 
 # --- MOCK DATABASES ---
@@ -59,8 +78,13 @@ if 'ambulances' not in st.session_state:
         {"id": "AMB-03", "lat": 8.970, "lon": 38.790, "status": "Available"}
     ]
 
+# Initialize route and simulation variables
 if 'active_route' not in st.session_state:
     st.session_state.active_route = None
+if 'sim_progress' not in st.session_state:
+    st.session_state.sim_progress = 0.0
+if 'dispatched_amb' not in st.session_state:
+    st.session_state.dispatched_amb = None
 
 # --- LOAD MAP DATA ---
 @st.cache_data
@@ -76,7 +100,7 @@ def load_data():
 
 gdf = load_data()
 
-# Haversine distance formula
+# Haversine distance
 def haversine(lat1, lon1, lat2, lon2):
     R = 6371.0 
     lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
@@ -98,98 +122,107 @@ with tab1:
     col1, col2 = st.columns([1, 3])
     
     with col1:
-        st.header("Dispatch Simulator")
+        st.header("Dispatch Console")
         
+        # --- CALLER INTEGRATION ---
+        st.subheader("📞 Caller Info")
+        caller_name = st.text_input("Caller Name:")
+        caller_phone = st.text_input("Caller Phone:")
+        
+        st.markdown("---")
+        st.subheader("📍 Incident Location")
         clinics = gdf[gdf['Type_Clean'] == 'Clinic'].copy()
         if not clinics.empty:
             selected_clinic = st.selectbox("Select Patient Location (Clinic):", clinics['Name'].tolist())
             clinic_row = clinics[clinics['Name'] == selected_clinic].iloc[0]
             c_lon, c_lat = clinic_row.geometry.x, clinic_row.geometry.y
-            st.write(f"Target Coordinates: {c_lat:.4f}, {c_lon:.4f}")
-        else:
-            st.warning("No clinics found in database.")
-
+            st.write(f"Coords: {c_lat:.4f}, {c_lon:.4f}")
+        
         st.markdown("---")
-        st.subheader("🚑 Fleet Status")
-        for amb in st.session_state.ambulances:
-            if amb['status'] == 'Available':
-                st.success(f"{amb['id']}: Available")
-            else:
-                st.warning(f"{amb['id']}: {amb['status']}")
-                
         if st.button("🚨 Dispatch Nearest Ambulance", type="primary"):
-            with st.spinner("Calculating optimal route via OSRM..."):
-                
+            with st.spinner("Routing via OSRM..."):
                 available_ambs = [a for a in st.session_state.ambulances if a['status'] == 'Available']
-                if not available_ambs:
-                    st.error("No ambulances available!")
-                else:
+                if available_ambs:
                     available_ambs.sort(key=lambda a: haversine(a['lat'], a['lon'], c_lat, c_lon))
                     nearest_amb = available_ambs[0]
                     
                     available_hospitals = [k for k, v in st.session_state.hospital_db.items() if v['beds'] > 0]
                     if available_hospitals:
                         assigned_hosp = available_hospitals[0]
-                        
                         route = get_route(nearest_amb['lon'], nearest_amb['lat'], c_lon, c_lat)
                         
                         if route:
                             st.session_state.active_route = route['geometry']['coordinates']
                             nearest_amb['status'] = f"En route to {assigned_hosp}"
+                            st.session_state.dispatched_amb = nearest_amb['id']
+                            st.session_state.sim_progress = 0.0 # Reset simulation
                             st.session_state.hospital_db[assigned_hosp]['beds'] -= 1
                             
-                            st.success("Dispatch Successful!")
-                            st.write(f"**Assigned Unit:** {nearest_amb['id']} (Nearest to scene)")
+                            # --- SAVE TO DATABASE ---
+                            conn = sqlite3.connect('ethio_health.db')
+                            c = conn.cursor()
+                            c.execute("INSERT INTO dispatches (caller_name, caller_phone, clinic, ambulance, hospital) VALUES (?, ?, ?, ?, ?)",
+                                      (caller_name, caller_phone, selected_clinic, nearest_amb['id'], assigned_hosp))
+                            conn.commit()
+                            conn.close()
+                            
+                            st.success("Dispatch Successful & Logged to DB!")
+                            st.write(f"**Unit:** {nearest_amb['id']}")
                             st.write(f"**Destination:** {assigned_hosp}")
-                            st.write(f"**Real Driving Distance:** {route['distance']/1000:.2f} km")
-                            st.write(f"**Estimated ETA:** {route['duration']/60:.1f} minutes")
+                            st.write(f"**Distance:** {route['distance']/1000:.2f} km | **ETA:** {route['duration']/60:.1f} mins")
                         else:
-                            st.error("Routing engine failed to find a path.")
+                            st.error("Routing failed.")
                     else:
-                        st.error("CRITICAL: No hospital beds available in the network!")
+                        st.error("No hospital beds available!")
+
+        # --- LIVE SIMULATION SLIDER ---
+        if st.session_state.active_route and st.session_state.dispatched_amb:
+            st.markdown("---")
+            st.subheader("📡 Live GPS Simulation")
+            st.write(f"Tracking **{st.session_state.dispatched_amb}** along route:")
+            st.session_state.sim_progress = st.slider("Simulation Progress (%)", 0, 100, int(st.session_state.sim_progress * 100)) / 100.0
 
     with col2:
         m = folium.Map(location=[9.0116, 38.7878], zoom_start=12)
         
-        # CREATE MAP LAYERS FOR TOGGLING
         clinics_layer = folium.FeatureGroup(name="Clinics")
         hospitals_layer = folium.FeatureGroup(name="Hospitals")
         ambulances_layer = folium.FeatureGroup(name="Ambulances")
         
-        # Plot Clinics (Small Blue Dots to prevent clutter)
+        # Plot Clinics
         for _, row in clinics.iterrows():
-            folium.CircleMarker(
-                [row.geometry.y, row.geometry.x], 
-                radius=3, 
-                color='blue', 
-                fill=True, 
-                fill_opacity=0.6, 
-                popup=row['Name']
-            ).add_to(clinics_layer)
+            folium.CircleMarker([row.geometry.y, row.geometry.x], radius=3, color='blue', fill=True, fill_opacity=0.6, popup=row['Name']).add_to(clinics_layer)
             
         # Plot Hospitals
         for h_name, h_data in st.session_state.hospital_db.items():
             color = 'green' if h_data['beds'] > 0 else 'red'
-            folium.Marker(
-                h_data['coords'], 
-                popup=f"{h_name} (Beds: {h_data['beds']})", 
-                icon=folium.Icon(color=color, icon='plus', prefix='fa')
-            ).add_to(hospitals_layer)
+            folium.Marker(h_data['coords'], popup=f"{h_name} (Beds: {h_data['beds']})", icon=folium.Icon(color=color, icon='plus', prefix='fa')).add_to(hospitals_layer)
             
-        # Plot Live Ambulances
+        # Plot Ambulances
         for amb in st.session_state.ambulances:
-            folium.Marker(
-                [amb['lat'], amb['lon']], 
-                popup=amb['id'], 
-                icon=folium.Icon(color='orange', icon='ambulance', prefix='fa')
-            ).add_to(ambulances_layer)
+            # If this ambulance is the one dispatched, we will draw it dynamically on the route
+            if amb['id'] == st.session_state.dispatched_amb and st.session_state.active_route:
+                continue 
+                
+            folium.Marker([amb['lat'], amb['lon']], popup=amb['id'], icon=folium.Icon(color='orange', icon='ambulance', prefix='fa')).add_to(ambulances_layer)
 
-        # Draw Route if active
+        # Draw Route & Animated Ambulance
         if st.session_state.active_route:
             route_coords = [[lat, lon] for lon, lat in st.session_state.active_route]
             folium.PolyLine(route_coords, color="red", weight=5, opacity=0.8, tooltip="Active Route").add_to(m)
+            
+            # Calculate current ambulance position based on slider
+            total_points = len(route_coords)
+            current_index = int(st.session_state.sim_progress * (total_points - 1))
+            current_pos = route_coords[current_index]
+            
+            # Draw the moving ambulance
+            folium.Marker(
+                current_pos, 
+                popup=f"LIVE: {st.session_state.dispatched_amb}", 
+                icon=folium.Icon(color='red', icon='ambulance', prefix='fa')
+            ).add_to(m)
 
-        # Add layers to map and add control box
         clinics_layer.add_to(m)
         hospitals_layer.add_to(m)
         ambulances_layer.add_to(m)
@@ -210,7 +243,6 @@ with tab2:
             with col_b:
                 new_icu = st.number_input(f"Available ICU", min_value=0, value=data['icu'], key=f"icu_{hosp_name}")
             with col_c:
-                st.write("Status:")
                 if new_beds > 0:
                     st.success("🟢 Open")
                 else:
@@ -219,6 +251,18 @@ with tab2:
             st.session_state.hospital_db[hosp_name]['beds'] = new_beds
             st.session_state.hospital_db[hosp_name]['icu'] = new_icu
             st.divider()
+            
+    # --- VIEW DISPATCH LOGS ---
+    st.markdown("---")
+    st.subheader("📋 Recent Dispatch Logs (From Database)")
+    conn = sqlite3.connect('ethio_health.db')
+    df_logs = pd.read_sql_query("SELECT * FROM dispatches ORDER BY time DESC LIMIT 10", conn)
+    conn.close()
+    
+    if not df_logs.empty:
+        st.dataframe(df_logs, use_container_width=True)
+    else:
+        st.info("No dispatches logged yet.")
 
 # --- TAB 3: AI CLINICAL TRIAGE ---
 with tab3:
@@ -229,19 +273,13 @@ with tab3:
         st.warning("⚠️ Please enter your OpenAI API Key in the sidebar to use the AI Triage.")
     
     with st.form("triage_form"):
-        symptoms = st.text_area("Describe the primary complaint (e.g., 'My father is clutching his chest and sweating profusely'):")
+        symptoms = st.text_area("Describe the primary complaint:")
         age = st.number_input("Patient Age:", min_value=0, max_value=120, value=30)
         submitted = st.form_submit_button("Analyze with AI")
         
         if submitted and symptoms and openai_api_key:
             with st.spinner("AI analyzing symptoms..."):
-                prompt = f"""
-                You are an expert medical dispatcher. Based on these symptoms, classify the emergency as CRITICAL (Red), URGENT (Yellow), or NON-URGENT (Green).
-                Provide a 1-sentence reason.
-                Patient Age: {age}
-                Symptoms: {symptoms}
-                Output format: [Triage Level] - [Reason]
-                """
+                prompt = f"You are an expert medical dispatcher. Based on these symptoms, classify the emergency as CRITICAL (Red), URGENT (Yellow), or NON-URGENT (Green). Provide a 1-sentence reason. Patient Age: {age}. Symptoms: {symptoms}. Output format: [Triage Level] - [Reason]"
                 try:
                     response = client.chat.completions.create(
                         model="gpt-3.5-turbo",
