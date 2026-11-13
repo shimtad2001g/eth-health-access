@@ -54,14 +54,16 @@ authenticator = stauth.Authenticate(
     config['cookie']['expiry_days']
 )
 
-name, authentication_status, username = authenticator.login('main')
+authenticator.login('main')
 
-if authentication_status == False:
+if st.session_state.get('authentication_status') is False:
     st.error('Username/password is incorrect')
     st.stop()
-elif authentication_status == None:
+elif st.session_state.get('authentication_status') is None:
     st.warning('Please enter your username and password')
     st.stop()
+else:
+    name = st.session_state.get('name')
 
 # ==========================================
 # 2. DATABASE SETUP (SQLAlchemy)
