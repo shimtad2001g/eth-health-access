@@ -1,3 +1,4 @@
+$fullCode = @'
 import os
 import streamlit as st
 import geopandas as gpd
@@ -26,7 +27,6 @@ st.set_page_config(
 # ==========================================
 # 1. DATABASE & CONFIG SETUP
 # ==========================================
-# Creates a default config.yaml if it doesn't exist
 if not os.path.exists('config.yaml'):
     hashed_password = stauth.Hasher.hash('password123')
     config = {
@@ -48,7 +48,6 @@ if not os.path.exists('config.yaml'):
 with open('config.yaml') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
-# SQLAlchemy setup for dispatch logs
 DATABASE_URL = "sqlite:///ethio_health.db"
 engine = create_engine(DATABASE_URL, echo=False)
 Base = declarative_base()
@@ -84,13 +83,12 @@ with st.sidebar.expander("ℹ️ About the Developer"):
     
     *Disclaimer: This is a pilot system. Do not use for actual emergency dispatch until fully certified by the Ministry of Health.*
     """)
-    # Email link that opens compose window
     st.markdown("[📧 Email Me](mailto:shimeles.tadesse@example.com?subject=EthioHealth%20System%20Inquiry&body=Hello%20Shimeles,%0A%0AI%20am%20interested%20in%20the%20EthioHealth%20System.)")
 
 st.sidebar.markdown("---")
 
 # ==========================================
-# 3. AUTHENTICATION & 48-HOUR DEMO LOGIC
+# 3. AUTHENTICATION, DEMO, & DEVELOPER BACKDOOR
 # ==========================================
 authenticator = stauth.Authenticate(
     config['credentials'],
@@ -99,12 +97,18 @@ authenticator = stauth.Authenticate(
     config['cookie']['expiry_days']
 )
 
-# Check for demo mode in URL params (e.g., ?demo=true&start=2026-11-13T12:00:00)
 query_params = st.query_params
 demo_mode = False
 time_remaining = None
+is_dev = False
 
-if query_params.get("demo") == "true" and query_params.get("start"):
+# 👑 SECRET DEVELOPER BACKDOOR 👑
+if "dev_access" in query_params and query_params["dev_access"] == "shimeles_admin_2026":
+    is_dev = True
+    demo_mode = False
+
+# 48-Hour Demo Logic
+if not is_dev and query_params.get("demo") == "true" and query_params.get("start"):
     try:
         start_time = datetime.fromisoformat(query_params.get("start"))
         elapsed = datetime.now() - start_time
@@ -117,8 +121,8 @@ if query_params.get("demo") == "true" and query_params.get("start"):
     except:
         st.query_params.clear()
 
-if not demo_mode:
-    # --- STANDARD AUTHENTICATION ---
+# Standard Login
+if not demo_mode and not is_dev:
     authenticator.login()
     
     if st.session_state.get('authentication_status') is False:
@@ -146,42 +150,45 @@ if not demo_mode:
                 
                 if st.form_submit_button("Register Account"):
                     if new_name and new_email and new_pass and agree:
-                        if new_name.lower() in config['credentials']['usernames']:
+                        username_key = new_name.lower().replace(" ", "")
+                        if username_key in config['credentials']['usernames']:
                             st.error("Username/Name already exists.")
                         else:
                             hashed_pw = stauth.Hasher.hash(new_pass)
                             trial_end = (datetime.now() + timedelta(days=30)).isoformat()
                             
-                            # Add user to config
-                            config['credentials']['usernames'][new_name.lower()] = {
+                            config['credentials']['usernames'][username_key] = {
                                 'email': new_email,
                                 'name': new_name,
                                 'password': hashed_pw,
                                 'trial_end': trial_end
                             }
                             
-                            # Save to YAML
                             with open('config.yaml', 'w') as file:
                                 yaml.dump(config, file, default_flow_style=False)
                             
-                            st.success("Registration successful! You can now login. Your 1-month trial has started.")
+                            st.success(f"Registration successful! Log in using your username: {username_key}")
                     else:
                         st.warning("Please fill all fields and agree to the ethical terms.")
         
-    if not st.session_state.get('authentication_status') and not demo_mode:
-        st.stop() # Stop app if not logged in and not in demo mode
+    if not st.session_state.get('authentication_status') and not demo_mode and not is_dev:
+        st.stop()
 
-# --- LOGGED IN / DEMO UI ---
-if demo_mode:
+# --- LOGGED IN / DEMO / DEV UI ---
+if is_dev:
+    st.success("👑 **DEVELOPER ACCESS GRANTED** - Unlimited Full System Control.")
+    name = "Developer (Admin)"
+elif demo_mode:
     st.warning(f"⚠️ **DEMO MODE ACTIVE** - Time remaining: {str(time_remaining).split('.')[0]}. Data will not be saved. [Register here](#) to save data.")
     name = "Demo User"
 else:
     name = st.session_state.get('name')
     authenticator.logout('Logout', 'sidebar')
 
-# Check Trial Expiration for logged-in users
-if not demo_mode and not st.session_state.get('authentication_status') == False:
-    user_data = config['credentials']['usernames'].get(st.session_state.get('username'))
+# Check Trial Expiration
+if not demo_mode and not is_dev and not st.session_state.get('authentication_status') == False:
+    user_key = st.session_state.get('username')
+    user_data = config['credentials']['usernames'].get(user_key)
     if user_data and 'trial_end' in user_data:
         trial_end = datetime.fromisoformat(user_data['trial_end'])
         if datetime.now() > trial_end:
@@ -246,7 +253,7 @@ def haversine(lat1, lon1, lat2, lon2):
 st.title("🚑 EthioHealth Emergency Command Center")
 st.write(f"Welcome, **{name}**!")
 
-tab1, tab2, tab3 = st.tabs(["📡 Dispatch Simulator", "🏥 Hospital Capacity", "🧠 AI Triage"])
+tab1, tab2, tab3, tab4 = st.tabs(["📡 Dispatch Simulator", "🏥 Hospital Capacity", "🧠 AI Triage", "❓ Help & Guide"])
 
 with tab1:
     col1, col2 = st.columns([1, 3])
@@ -418,3 +425,74 @@ with tab3:
                     else: st.success(f"**AI Triage:** {ai_result}")
                 except Exception as e:
                     st.error(f"AI Error: {e}")
+
+# --- TAB 4: HELP & DOCUMENTATION ---
+with tab4:
+    st.header("❓ System User Guide & Help")
+    st.markdown("Welcome to the **EthioHealth Emergency Command Center**. This guide explains every visible part of the platform to ensure you can save lives efficiently.")
+    
+    st.markdown("---")
+    
+    st.subheader("1. Sidebar Navigation (Left Panel)")
+    st.markdown("""
+    *   **About the Developer:** Click this to read about the system's creator, the ethical disclaimer, and a direct email link to contact the developer.
+    *   **OpenAI API Key:** If you want to use the AI Triage feature, you must paste your OpenAI API Key here. *Note: The key is only stored in your browser session and is never saved to our database.*
+    *   **Logout:** Securely logs you out of the Command Center.
+    """)
+    
+    st.markdown("---")
+    
+    st.subheader("2. 📡 Dispatch Simulator Tab")
+    st.markdown("""
+    This is the core of the Command Center. It allows you to receive a call, locate the patient, and dispatch the nearest ambulance.
+    
+    *   **📞 Caller Info:** Enter the caller's name and phone number. This is permanently saved to the database for reporting.
+    *   **📍 Incident Location:** Select the clinic or health center where the patient is located. The system automatically reads the GPS coordinates of this facility.
+    *   **🚨 Dispatch Nearest Ambulance Button:** 
+        *   When clicked, the system calculates the physical distance (using Haversine formula) to find the **closest available ambulance**.
+        *   It then queries the **OSRM routing engine** to find the fastest driving path on real roads.
+        *   It assigns the patient to the nearest hospital that has available beds.
+    *   **📡 Live IoT Hardware Tracking:** Once dispatched, this slider simulates real-time GPS telemetry from the ambulance. You can watch the red ambulance icon move along the red route line on the map.
+    """)
+    
+    st.markdown("---")
+    
+    st.subheader("3. 🏥 Hospital Capacity Tab")
+    st.markdown("""
+    This tab manages the real-time bed availability of the network's hospitals.
+    
+    *   **Available Beds / ICU:** You can manually adjust the number of available beds and ICU units. 
+    *   **Dynamic Status:** If you set beds to `0`, the hospital's marker on the map turns **Red** (Full), and the dispatch algorithm will skip it. If you set it above `0`, it turns **Green** (Open).
+    *   **📋 Dispatch Logs:** At the bottom of this tab, you can view the permanent SQL database records of every dispatch, including the time, caller, and destination.
+    """)
+    
+    st.markdown("---")
+    
+    st.subheader("4. 🧠 AI Triage Tab")
+    st.markdown("""
+    This tab uses Generative AI (OpenAI) to assist dispatchers in prioritizing emergencies.
+    
+    *   **How to use:** Type the patient's symptoms into the text box (e.g., *"Chest pain radiating to the left arm"*).
+    *   **The AI Engine:** The app sends the symptoms to GPT-3.5, which analyzes the text and classifies the emergency into three colors:
+        *   🔴 **CRITICAL (Red):** Immediate dispatch required (life-threatening).
+        *   🟡 **URGENT (Yellow):** Needs medical attention within 30 minutes.
+        *   🟢 **NON-URGENT (Green):** Advise the patient to visit a clinic on their own.
+    """)
+    
+    st.markdown("---")
+    
+    st.subheader("5. The Map Interface")
+    st.markdown("""
+    *   **Blue Dots:** Represent clinics and health centers.
+    *   **Green/Red Crosses:** Represent hospitals (Green = Beds available, Red = Full).
+    *   **Orange Ambulances:** Represent the current positions of your active fleet.
+    *   **Red Line:** The active driving route calculated by OSRM.
+    *   **Layer Control (Top Right of Map):** You can toggle the visibility of clinics, hospitals, and ambulances on and off to reduce map clutter.
+    """)
+    
+    st.info("💡 **Pro Tip:** If the system feels slow, it may be due to the OSRM routing API or the OpenAI API processing your request. Always ensure you have a stable internet connection.")
+'@
+
+Set-Content -Path app\Home.py -Value $fullCode -Encoding UTF8
+Write-Host "Code successfully written to app\Home.py!" -ForegroundColor Green
+notepad app\Home.py
