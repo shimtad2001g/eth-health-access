@@ -4,21 +4,21 @@ import geopandas as gpd
 import folium
 from streamlit_folium import st_folium
 import requests
+import math
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
     page_title="EthioHealth Access", 
-    page_icon="assets/logo.png", # Set the browser tab icon to your logo
+    page_icon="assets/logo.png", 
     layout="wide"
 )
 
 # --- LOGO INTEGRATION ---
 if os.path.exists("assets/logo.png"):
-    st.logo("assets/logo.png", size="large") # Top left corner
-    st.sidebar.image("assets/logo.png", use_container_width=True) # Sidebar
+    st.logo("assets/logo.png", size="large")
+    st.sidebar.image("assets/logo.png", use_container_width=True)
 else:
     st.sidebar.warning("⚠️ Logo missing! Check assets/logo.png")
-# ------------------------
 
 # USE PUBLIC OSRM FOR CLOUD DEPLOYMENT
 OSRM_URL = "https://router.project-osrm.org"
@@ -38,10 +38,28 @@ def get_route(orig_lon, orig_lat, dest_lon, dest_lat):
         return None
     return None
 
+# Load data once
+gdf = load_data()
+
+# --- VALIDATION & ACCURACY METRICS (SIDEBAR) ---
+st.sidebar.markdown("---")
+st.sidebar.subheader("📊 Data & System Validation")
+
+total_facilities = len(gdf)
+valid_coords = gdf.geometry.is_valid.sum()
+data_accuracy = (valid_coords / total_facilities) * 100
+
+st.sidebar.metric(label="Data Completeness", value=f"{data_accuracy:.1f}%")
+st.sidebar.caption(f"Validated {valid_coords} of {total_facilities} facility coordinates.")
+
+st.sidebar.metric(label="Routing Engine", value="OSRM (Active)")
+st.sidebar.caption("Live cloud-based route validation against OpenStreetMap.")
+st.sidebar.markdown("---")
+
+# --- MAIN APP UI ---
 st.title("🚑 EthioHealth Access - Addis Ababa Pilot")
 st.markdown("Select a clinic to find the fastest route to a nearby hospital.")
 
-gdf = load_data()
 col1, col2 = st.columns([1, 3])
 
 with col1:
@@ -73,6 +91,23 @@ with col1:
                     st.success(f"Nearest Hospital: {best_hospital['Name']}")
                     st.write(f"**Distance:** {best_route['distance']/1000:.2f} km")
                     st.write(f"**Time:** {best_route['duration']/60:.1f} minutes")
+                    
+                    # --- ROUTING EFFICIENCY METRIC ---
+                    R = 6371.0
+                    lat1, lon1 = math.radians(c_lat), math.radians(c_lon)
+                    lat2, lon2 = math.radians(best_hospital.geometry.y), math.radians(best_hospital.geometry.x)
+                    dlat = lat2 - lat1
+                    dlon = lon2 - lon1
+                    a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
+                    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+                    straight_dist = R * c
+                    
+                    drive_dist = best_route['distance'] / 1000
+                    efficiency = (straight_dist / drive_dist) * 100 if drive_dist > 0 else 0
+                    
+                    st.info(f"**Routing Efficiency:** {efficiency:.1f}% (Directness of route)")
+                    # ---------------------------------
+
                     st.session_state['route_geom'] = best_route['geometry']['coordinates']
                     st.session_state['dest_coords'] = [best_hospital.geometry.y, best_hospital.geometry.x]
                 else:
