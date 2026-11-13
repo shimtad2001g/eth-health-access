@@ -1,4 +1,4 @@
-﻿streamlit
+streamlit
 geopandas
 folium
 streamlit-folium
