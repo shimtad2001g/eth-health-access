@@ -1,4 +1,4 @@
-import os
+﻿import os
 import streamlit as st
 import geopandas as gpd
 import folium
@@ -469,13 +469,23 @@ with tab4:
     
     st.subheader("4. 🧠 AI Triage Tab")
     st.markdown("""
-    This tab uses Generative AI (OpenAI) to assist dispatchers in prioritizing emergencies.
+    **What is AI Triage?** 
+    Triage is the process of determining the priority of patients' treatments based on the severity of their condition. **AI Triage** uses Artificial Intelligence (Natural Language Processing) to automatically analyze unstructured patient symptoms and instantly categorize the emergency.
     
-    *   **How to use:** Type the patient's symptoms into the text box (e.g., *"Chest pain radiating to the left arm"*).
-    *   **The AI Engine:** The app sends the symptoms to GPT-3.5, which analyzes the text and classifies the emergency into three colors:
-        *   🔴 **CRITICAL (Red):** Immediate dispatch required (life-threatening).
-        *   🟡 **URGENT (Yellow):** Needs medical attention within 30 minutes.
-        *   🟢 **NON-URGENT (Green):** Advise the patient to visit a clinic on their own.
+    **The Purpose:** 
+    In an emergency, seconds matter. The AI acts as a co-pilot for the dispatcher. It takes panicked, unstructured descriptions from a caller (e.g., *"My dad is sweating and holding his chest"*) and translates them into a clear priority level.
+    
+    **Benefits for Users:**
+    *   **Faster Response Times:** Critical patients are identified in milliseconds, reducing dispatch time.
+    *   **Reduces Human Error:** The AI consistently checks for life-threatening keywords without getting tired or panicked.
+    *   **Standardized Prioritization:** Ensures every caller is evaluated using the exact same medical protocols.
+    *   **Optimized Resource Allocation:** Correctly identifying non-urgent cases (Green) saves ambulances and hospital beds for life-threatening cases (Red).
+    *   **Supports Staff:** Empowers newer dispatchers with the clinical decision-making power of an expert medical director.
+    
+    **How to use it in this app:** Type the patient's symptoms into the text box. The app sends the text to GPT-3.5, which classifies the emergency into three colors:
+    *   🔴 **CRITICAL (Red):** Immediate dispatch required (life-threatening).
+    *   🟡 **URGENT (Yellow):** Needs medical attention within 30 minutes.
+    *   🟢 **NON-URGENT (Green):** Advise the patient to visit a clinic on their own.
     """)
     
     st.markdown("---")
