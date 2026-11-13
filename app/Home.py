@@ -5,7 +5,20 @@ import folium
 from streamlit_folium import st_folium
 import requests
 
-st.set_page_config(page_title="EthioHealth Access", page_icon="🚑", layout="wide")
+# --- PAGE CONFIGURATION ---
+st.set_page_config(
+    page_title="EthioHealth Access", 
+    page_icon="assets/logo.png", # Set the browser tab icon to your logo
+    layout="wide"
+)
+
+# --- LOGO INTEGRATION ---
+if os.path.exists("assets/logo.png"):
+    st.logo("assets/logo.png", size="large") # Top left corner
+    st.sidebar.image("assets/logo.png", use_container_width=True) # Sidebar
+else:
+    st.sidebar.warning("⚠️ Logo missing! Check assets/logo.png")
+# ------------------------
 
 # USE PUBLIC OSRM FOR CLOUD DEPLOYMENT
 OSRM_URL = "https://router.project-osrm.org"
