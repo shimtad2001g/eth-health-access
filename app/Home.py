@@ -24,7 +24,138 @@ st.set_page_config(
 )
 
 # ==========================================
-# 1. DATABASE & CONFIG SETUP
+# 1. INTERNATIONALIZATION (i18n) DICTIONARY
+# ==========================================
+# Expanded to the Top 15 languages of Ethiopia
+LANGUAGES = [
+    "English", 
+    "አማርኛ (Amharic)", 
+    "Afaan Oromoo (Oromo)", 
+    "ትግርኛ (Tigrinya)", 
+    "Somali", 
+    "Sidaamu Afoo (Sidama)", 
+    "Wolayttattuwa (Wolaytta)", 
+    "Gurage", 
+    "Qafar Af (Afar)", 
+    "Gamo",
+    "Hadiyyisa (Hadiyya)",
+    "Kambaatissa (Kembata)",
+    "Gedeoffa (Gedeo)",
+    "ስልጥኛ (Silt'e)",
+    "Kafinoonoo (Kafa)"
+]
+
+TRANSLATIONS = {
+    "English": {
+        "lang_select": "🌐 Select Language",
+        "disp_tab": "📡 Dispatch Simulator",
+        "cap_tab": "🏥 Hospital Capacity",
+        "triage_tab": "🧠 AI Triage",
+        "help_tab": "❓ Help & Guide",
+        "caller_info": "📞 Caller Info",
+        "caller_name": "Caller Name:",
+        "caller_phone": "Caller Phone:",
+        "incident_loc": "📍 Incident Location",
+        "select_clinic": "Select Patient Location:",
+        "dispatch_btn": "🚨 Dispatch Nearest Ambulance",
+        "fleet_status": "🚑 Fleet Status",
+        "welcome": "Welcome",
+        "logout": "Logout",
+        "demo_btn": "🚀 Start 48-Hour Free Demo",
+        "reg_title": "Register for 1-Month Trial",
+        "login": "Login",
+        "help_title": "❓ System User Guide & Help"
+    },
+    "አማርኛ (Amharic)": {
+        "lang_select": "🌐 ቋንቋ ይምረጡ",
+        "disp_tab": "📡 የመላኪያ ማስመሰያ",
+        "cap_tab": "🏥 የሆስፒታል አቅም",
+        "triage_tab": "🧠 የAI ህክምና መለያ",
+        "help_tab": "❓ እርዳታ እና መመሪያ",
+        "caller_info": "📞 የደዋይ መረጃ",
+        "caller_name": "የደዋይ ስም:",
+        "caller_phone": "የደዋይ ስልክ ቁጥር:",
+        "incident_loc": "📍 የችግሩ ቦታ",
+        "select_clinic": "የታካሚውን ቦታ ይምረጡ:",
+        "dispatch_btn": "🚨 በቅርብ የሚገኝ አምቡላንስ ላክ",
+        "fleet_status": "🚑 የአምቡላንስ ሁኔታ",
+        "welcome": "እንኳን ደህና መጡ",
+        "logout": "ውጣ",
+        "demo_btn": "🚀 የ48 ሰዓት ነፃ ማሳያ ጀምር",
+        "reg_title": "ለ1 ወር ሙከራ ይመዝገቡ",
+        "login": "ግባ",
+        "help_title": "❓ የስርዓቱ የተጠቃሚ መመሪያ እና እርዳታ"
+    },
+    "Afaan Oromoo (Oromo)": {
+        "lang_select": "🌐 Afaan Filadhu",
+        "disp_tab": "📡 Simulaatorii Ergaa",
+        "cap_tab": "🏥 Dandeettii Hospitaalaa",
+        "triage_tab": "🧠 AI Triage",
+        "help_tab": "❓ Gargaarsa",
+        "caller_info": "📞 Odeeffannoo Bilbilaa",
+        "caller_name": "Maqaa Bilbilaa:",
+        "caller_phone": "Lakkoofsa Bilbilaa:",
+        "incident_loc": "📍 Bakka Rakkoo",
+        "select_clinic": "Bakka Dhukkubsataa Filadhu:",
+        "dispatch_btn": "🚨 Ambulaansii Dhihoo Ergi",
+        "fleet_status": "🚑 Haala Ambulaansii",
+        "welcome": "Baga Nagaan Dhuftan",
+        "logout": "Ba'i",
+        "demo_btn": "🚀 Demo Sa'aatii 48 Horaa Jalqabi",
+        "reg_title": "Ji'a 1f Qormaataaf Galmaa'i",
+        "login": "Seeni",
+        "help_title": "❓ Qajeelfama Fayyadamaa"
+    },
+    "ትግርኛ (Tigrinya)": {
+        "lang_select": "🌐 ቋንቋ ምረጽ",
+        "disp_tab": "📡 መላኪያ ሲሙሌተር",
+        "cap_tab": "🏥 ክእለት ሆስፒታል",
+        "triage_tab": "🧠 AI Triage",
+        "help_tab": "❓ ሓገዝ",
+        "caller_info": "📞 ሓበሬታ ደዋይ",
+        "caller_name": "ስም ደዋይ:",
+        "caller_phone": "ቁጽሪ ስልኪ:",
+        "incident_loc": "📍 ቦታ ጸገም",
+        "select_clinic": "ቦታ ሕሙም ምረጽ:",
+        "dispatch_btn": "🚨 ቀረባ ኣምቡላንስ ስደድ",
+        "fleet_status": "🚑 ኩነታት ኣምቡላንስ",
+        "welcome": "እንቋዕ ብደሓን መጻእኩም",
+        "logout": "ውጻእ",
+        "demo_btn": "🚀 ናይ 48 ሰዓት ነጻ ሙከራ ጀምር",
+        "reg_title": "ን1 ወርሒ ፈተነ ተመዝገብ",
+        "login": "እቶ",
+        "help_title": "❓ መምርሒ ተጠቃሚ"
+    },
+    "Somali": {
+        "lang_select": "🌐 Dooro Luuqadda",
+        "disp_tab": "📡 Simulator-ka Dirista",
+        "cap_tab": "🏥 Awoodda Isbitaalka",
+        "triage_tab": "🧠 AI Triage",
+        "help_tab": "❓ Caawinaad",
+        "caller_info": "📞 Macluumaadka Wacayaasha",
+        "caller_name": "Magaca Wacayaasha:",
+        "caller_phone": "Lambarka Taleefanka:",
+        "incident_loc": "📍 Goobta Dhacdada",
+        "select_clinic": "Dooro Goobta Bukaanka:",
+        "dispatch_btn": "🚨 Dir Ambulance-ka ugu dhow",
+        "fleet_status": "🚑 Xaaladda Ambulance-ka",
+        "welcome": "Ku soo dhawow",
+        "logout": "Ka bax",
+        "demo_btn": "🚀 Bilow 48-saacadood Demo Bilaash ah",
+        "reg_title": "Isku qor 1 Bilood Tijaabo",
+        "login": "Gal",
+        "help_title": "❓ Hagaha Isticmaalaha"
+    }
+}
+
+# Fallback for remaining 10 languages to English (so the app doesn't break)
+# You can easily replace these English strings with native translations in the future.
+for lang in LANGUAGES:
+    if lang not in TRANSLATIONS:
+        TRANSLATIONS[lang] = TRANSLATIONS["English"]
+
+# ==========================================
+# 2. DATABASE & CONFIG SETUP
 # ==========================================
 if not os.path.exists('config.yaml'):
     hashed_password = stauth.Hasher.hash('password123')
@@ -66,7 +197,7 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 # ==========================================
-# 2. DEVELOPER INFO & SIDEBAR
+# 3. SIDEBAR & LANGUAGE SELECTION
 # ==========================================
 if os.path.exists("assets/logo.png"):
     st.logo("assets/logo.png", size="large")
@@ -74,12 +205,17 @@ if os.path.exists("assets/logo.png"):
 else:
     st.sidebar.warning("⚠️ Logo missing! Check assets/logo.png")
 
+# Language Selector (Default to English, index 0)
+selected_lang = st.sidebar.selectbox("🌐 Language / ቋንቋ", LANGUAGES, index=0)
+
+# Translation function
+def t(key):
+    return TRANSLATIONS[selected_lang].get(key, key)
+
 with st.sidebar.expander("ℹ️ About the Developer"):
     st.markdown("""
     **Developed by:** Shimeles Tadesse Zelelew
     **Status:** Prototype / Not Patented yet.
-    This system is designed to save lives by optimizing emergency dispatch. 
-    
     *Disclaimer: This is a pilot system. Do not use for actual emergency dispatch until fully certified by the Ministry of Health.*
     """)
     st.markdown("[📧 Email Me](mailto:shimeles.tadesse@example.com?subject=EthioHealth%20System%20Inquiry&body=Hello%20Shimeles,%0A%0AI%20am%20interested%20in%20the%20EthioHealth%20System.)")
@@ -87,7 +223,7 @@ with st.sidebar.expander("ℹ️ About the Developer"):
 st.sidebar.markdown("---")
 
 # ==========================================
-# 3. AUTHENTICATION, DEMO, & DEVELOPER BACKDOOR
+# 4. AUTHENTICATION, DEMO, & DEVELOPER BACKDOOR
 # ==========================================
 authenticator = stauth.Authenticate(
     config['credentials'],
@@ -122,7 +258,7 @@ if not is_dev and query_params.get("demo") == "true" and query_params.get("start
 
 # Standard Login
 if not demo_mode and not is_dev:
-    authenticator.login()
+    authenticator.login(location='main', fields={'Form name': t("login")})
     
     if st.session_state.get('authentication_status') is False:
         st.error('Username/password is incorrect')
@@ -132,20 +268,19 @@ if not demo_mode and not is_dev:
         col1, col2 = st.columns(2)
         with col1:
             st.markdown("### Try the System")
-            if st.button("🚀 Start 48-Hour Free Demo", use_container_width=True):
+            if st.button(t("demo_btn"), use_container_width=True):
                 now_str = datetime.now().isoformat()
                 st.query_params["demo"] = "true"
                 st.query_params["start"] = now_str
                 st.rerun()
                 
         with col2:
-            st.markdown("### Register for 1-Month Trial")
+            st.markdown(f"### {t('reg_title')}")
             with st.form("register_form"):
                 new_name = st.text_input("Full Name")
                 new_email = st.text_input("Official Email")
-                new_org = st.text_input("Organization (e.g., MoH, NGO)")
                 new_pass = st.text_input("Password", type="password")
-                agree = st.checkbox("I agree to use this system responsibly and ethically. I understand this is a pilot system.")
+                agree = st.checkbox("I agree to use this system responsibly and ethically.")
                 
                 if st.form_submit_button("Register Account"):
                     if new_name and new_email and new_pass and agree:
@@ -155,17 +290,11 @@ if not demo_mode and not is_dev:
                         else:
                             hashed_pw = stauth.Hasher.hash(new_pass)
                             trial_end = (datetime.now() + timedelta(days=30)).isoformat()
-                            
                             config['credentials']['usernames'][username_key] = {
-                                'email': new_email,
-                                'name': new_name,
-                                'password': hashed_pw,
-                                'trial_end': trial_end
+                                'email': new_email, 'name': new_name, 'password': hashed_pw, 'trial_end': trial_end
                             }
-                            
                             with open('config.yaml', 'w') as file:
                                 yaml.dump(config, file, default_flow_style=False)
-                            
                             st.success(f"Registration successful! Log in using your username: {username_key}")
                     else:
                         st.warning("Please fill all fields and agree to the ethical terms.")
@@ -178,11 +307,11 @@ if is_dev:
     st.success("👑 **DEVELOPER ACCESS GRANTED** - Unlimited Full System Control.")
     name = "Developer (Admin)"
 elif demo_mode:
-    st.warning(f"⚠️ **DEMO MODE ACTIVE** - Time remaining: {str(time_remaining).split('.')[0]}. Data will not be saved. [Register here](#) to save data.")
+    st.warning(f"⚠️ **DEMO MODE ACTIVE** - Time remaining: {str(time_remaining).split('.')[0]}.")
     name = "Demo User"
 else:
     name = st.session_state.get('name')
-    authenticator.logout('Logout', 'sidebar')
+    authenticator.logout(t("logout"), 'sidebar')
 
 # Check Trial Expiration
 if not demo_mode and not is_dev and not st.session_state.get('authentication_status') == False:
@@ -191,11 +320,11 @@ if not demo_mode and not is_dev and not st.session_state.get('authentication_sta
     if user_data and 'trial_end' in user_data:
         trial_end = datetime.fromisoformat(user_data['trial_end'])
         if datetime.now() > trial_end:
-            st.error("Your 1-month trial has expired. Please email the developer for full access.")
+            st.error("Your 1-month trial has expired.")
             st.stop()
 
 # ==========================================
-# 4. APP LOGIC (OSRM, MAP, etc.)
+# 5. APP LOGIC (OSRM, MAP, etc.)
 # ==========================================
 OSRM_URL = "http://router.project-osrm.org/route/v1/driving/"
 
@@ -204,10 +333,8 @@ def get_route(orig_lon, orig_lat, dest_lon, dest_lat):
     try:
         response = requests.get(url, timeout=5)
         data = response.json()
-        if data.get('code') == 'Ok':
-            return data['routes'][0]
-    except Exception:
-        pass
+        if data.get('code') == 'Ok': return data['routes'][0]
+    except: pass
     return None
 
 if 'hospital_db' not in st.session_state:
@@ -250,30 +377,30 @@ def haversine(lat1, lon1, lat2, lon2):
     return R * (2 * math.atan2(math.sqrt(a), math.sqrt(1-a)))
 
 st.title("🚑 EthioHealth Emergency Command Center")
-st.write(f"Welcome, **{name}**!")
+st.write(f"{t('welcome')}, **{name}**!")
 
-tab1, tab2, tab3, tab4 = st.tabs(["📡 Dispatch Simulator", "🏥 Hospital Capacity", "🧠 AI Triage", "❓ Help & Guide"])
+tab1, tab2, tab3, tab4 = st.tabs([t("disp_tab"), t("cap_tab"), t("triage_tab"), t("help_tab")])
 
 with tab1:
     col1, col2 = st.columns([1, 3])
     
     with col1:
-        st.header("Dispatch Console")
-        st.subheader("📞 Caller Info")
-        caller_name = st.text_input("Caller Name:")
-        caller_phone = st.text_input("Caller Phone:")
+        st.header(t("disp_tab"))
+        st.subheader(t("caller_info"))
+        caller_name = st.text_input(t("caller_name"))
+        caller_phone = st.text_input(t("caller_phone"))
         
         st.markdown("---")
-        st.subheader("📍 Incident Location")
+        st.subheader(t("incident_loc"))
         clinics = gdf[gdf['Type_Clean'] == 'Clinic'].copy()
         if not clinics.empty:
-            selected_clinic = st.selectbox("Select Patient Location:", clinics['Name'].tolist())
+            selected_clinic = st.selectbox(t("select_clinic"), clinics['Name'].tolist())
             clinic_row = clinics[clinics['Name'] == selected_clinic].iloc[0]
             c_lon, c_lat = clinic_row.geometry.x, clinic_row.geometry.y
             st.write(f"Coords: {c_lat:.4f}, {c_lon:.4f}")
         
         st.markdown("---")
-        if st.button("🚨 Dispatch Nearest Ambulance", type="primary"):
+        if st.button(t("dispatch_btn"), type="primary"):
             with st.spinner("Routing via OSRM..."):
                 available_ambs = [a for a in st.session_state.ambulances if a['status'] == 'Available']
                 if available_ambs:
@@ -294,11 +421,8 @@ with tab1:
                             
                             if not demo_mode:
                                 new_dispatch = Dispatch(
-                                    caller_name=caller_name, 
-                                    caller_phone=caller_phone, 
-                                    clinic=selected_clinic, 
-                                    ambulance=nearest_amb['id'], 
-                                    hospital=assigned_hosp
+                                    caller_name=caller_name, caller_phone=caller_phone, 
+                                    clinic=selected_clinic, ambulance=nearest_amb['id'], hospital=assigned_hosp
                                 )
                                 session.add(new_dispatch)
                                 session.commit()
@@ -359,7 +483,7 @@ with tab1:
         st_folium(m, width="stretch", height=600)
 
 with tab2:
-    st.header("🏥 Real-Time Hospital Capacity Board")
+    st.header(t("cap_tab"))
     
     for idx, (hosp_name, data) in enumerate(st.session_state.hospital_db.items()):
         with st.container():
@@ -378,27 +502,24 @@ with tab2:
             st.divider()
             
     st.markdown("---")
-    st.subheader("📋 Recent Dispatch Logs (From Database)")
+    st.subheader("📋 Recent Dispatch Logs")
     
     if demo_mode:
-        st.info("Dispatch logs are disabled in Demo Mode. Register to save your data.")
+        st.info("Dispatch logs are disabled in Demo Mode.")
     else:
         logs = session.query(Dispatch).order_by(Dispatch.time.desc()).limit(10).all()
         if logs:
             log_data = [{
-                "Time": l.time.strftime("%Y-%m-%d %H:%M"), 
-                "Caller": l.caller_name, 
-                "Phone": l.caller_phone, 
-                "Ambulance": l.ambulance, 
-                "Hospital": l.hospital
+                "Time": l.time.strftime("%Y-%m-%d %H:%M"), "Caller": l.caller_name, 
+                "Phone": l.caller_phone, "Ambulance": l.ambulance, "Hospital": l.hospital
             } for l in logs]
             st.dataframe(pd.DataFrame(log_data), use_container_width=True)
         else:
             st.info("No dispatches logged yet.")
 
 with tab3:
-    st.header("🧠 AI-Powered Triage & Decision Support")
-    openai_api_key = st.sidebar.text_input("OpenAI API Key (for AI Triage)", type="password")
+    st.header(t("triage_tab"))
+    openai_api_key = st.sidebar.text_input("OpenAI API Key", type="password")
     if not openai_api_key:
         st.warning("⚠️ Please enter your OpenAI API Key in the sidebar.")
     else:
@@ -414,9 +535,7 @@ with tab3:
                 prompt = f"You are an expert medical dispatcher. Classify the emergency as CRITICAL (Red), URGENT (Yellow), or NON-URGENT (Green). Provide a 1-sentence reason. Patient Age: {age}. Symptoms: {symptoms}. Output format: [Triage Level] - [Reason]"
                 try:
                     response = client.chat.completions.create(
-                        model="gpt-3.5-turbo",
-                        messages=[{"role": "user", "content": prompt}],
-                        max_tokens=50
+                        model="gpt-3.5-turbo", messages=[{"role": "user", "content": prompt}], max_tokens=50
                     )
                     ai_result = response.choices[0].message.content
                     if "CRITICAL" in ai_result: st.error(f"**AI Triage:** {ai_result}")
@@ -425,78 +544,24 @@ with tab3:
                 except Exception as e:
                     st.error(f"AI Error: {e}")
 
-# --- TAB 4: HELP & DOCUMENTATION ---
 with tab4:
-    st.header("❓ System User Guide & Help")
+    st.header(t("help_title"))
     st.markdown("Welcome to the **EthioHealth Emergency Command Center**. This guide explains every visible part of the platform to ensure you can save lives efficiently.")
     
     st.markdown("---")
-    
-    st.subheader("1. Sidebar Navigation (Left Panel)")
-    st.markdown("""
-    *   **About the Developer:** Click this to read about the system's creator, the ethical disclaimer, and a direct email link to contact the developer.
-    *   **OpenAI API Key:** If you want to use the AI Triage feature, you must paste your OpenAI API Key here. *Note: The key is only stored in your browser session and is never saved to our database.*
-    *   **Logout:** Securely logs you out of the Command Center.
-    """)
+    st.subheader("1. Sidebar Navigation")
+    st.markdown("*   **Language Selector:** Switch between 15 Ethiopian languages.\n*   **About the Developer:** Read about the system's creator.\n*   **OpenAI API Key:** Required for AI Triage.\n*   **Logout:** Securely logs you out.")
     
     st.markdown("---")
-    
     st.subheader("2. 📡 Dispatch Simulator Tab")
-    st.markdown("""
-    This is the core of the Command Center. It allows you to receive a call, locate the patient, and dispatch the nearest ambulance.
-    
-    *   **📞 Caller Info:** Enter the caller's name and phone number. This is permanently saved to the database for reporting.
-    *   **📍 Incident Location:** Select the clinic or health center where the patient is located. The system automatically reads the GPS coordinates of this facility.
-    *   **🚨 Dispatch Nearest Ambulance Button:** 
-        *   When clicked, the system calculates the physical distance (using Haversine formula) to find the **closest available ambulance**.
-        *   It then queries the **OSRM routing engine** to find the fastest driving path on real roads.
-        *   It assigns the patient to the nearest hospital that has available beds.
-    *   **📡 Live IoT Hardware Tracking:** Once dispatched, this slider simulates real-time GPS telemetry from the ambulance. You can watch the red ambulance icon move along the red route line on the map.
-    """)
+    st.markdown("This is the core of the Command Center. Enter caller info, select the incident location, and click Dispatch. The system calculates the Haversine distance to find the closest ambulance and uses the OSRM routing engine to find the fastest path.")
     
     st.markdown("---")
-    
     st.subheader("3. 🏥 Hospital Capacity Tab")
-    st.markdown("""
-    This tab manages the real-time bed availability of the network's hospitals.
-    
-    *   **Available Beds / ICU:** You can manually adjust the number of available beds and ICU units. 
-    *   **Dynamic Status:** If you set beds to `0`, the hospital's marker on the map turns **Red** (Full), and the dispatch algorithm will skip it. If you set it above `0`, it turns **Green** (Open).
-    *   **📋 Dispatch Logs:** At the bottom of this tab, you can view the permanent SQL database records of every dispatch, including the time, caller, and destination.
-    """)
+    st.markdown("Manage real-time bed availability. If beds drop to 0, the marker turns Red, and the algorithm skips it.")
     
     st.markdown("---")
-    
     st.subheader("4. 🧠 AI Triage Tab")
-    st.markdown("""
-    **What is AI Triage?** 
-    Triage is the process of determining the priority of patients' treatments based on the severity of their condition. **AI Triage** uses Artificial Intelligence (Natural Language Processing) to automatically analyze unstructured patient symptoms and instantly categorize the emergency.
+    st.markdown("**What is AI Triage?** Triage is determining the priority of patients' treatments based on severity. AI Triage uses Natural Language Processing to automatically categorize the emergency.\n\n**Benefits:**\n*   Faster Response Times\n*   Reduces Human Error\n*   Standardized Prioritization\n*   Optimized Resource Allocation")
     
-    **The Purpose:** 
-    In an emergency, seconds matter. The AI acts as a co-pilot for the dispatcher. It takes panicked, unstructured descriptions from a caller (e.g., *"My dad is sweating and holding his chest"*) and translates them into a clear priority level.
-    
-    **Benefits for Users:**
-    *   **Faster Response Times:** Critical patients are identified in milliseconds, reducing dispatch time.
-    *   **Reduces Human Error:** The AI consistently checks for life-threatening keywords without getting tired or panicked.
-    *   **Standardized Prioritization:** Ensures every caller is evaluated using the exact same medical protocols.
-    *   **Optimized Resource Allocation:** Correctly identifying non-urgent cases (Green) saves ambulances and hospital beds for life-threatening cases (Red).
-    *   **Supports Staff:** Empowers newer dispatchers with the clinical decision-making power of an expert medical director.
-    
-    **How to use it in this app:** Type the patient's symptoms into the text box. The app sends the text to GPT-3.5, which classifies the emergency into three colors:
-    *   🔴 **CRITICAL (Red):** Immediate dispatch required (life-threatening).
-    *   🟡 **URGENT (Yellow):** Needs medical attention within 30 minutes.
-    *   🟢 **NON-URGENT (Green):** Advise the patient to visit a clinic on their own.
-    """)
-    
-    st.markdown("---")
-    
-    st.subheader("5. The Map Interface")
-    st.markdown("""
-    *   **Blue Dots:** Represent clinics and health centers.
-    *   **Green/Red Crosses:** Represent hospitals (Green = Beds available, Red = Full).
-    *   **Orange Ambulances:** Represent the current positions of your active fleet.
-    *   **Red Line:** The active driving route calculated by OSRM.
-    *   **Layer Control (Top Right of Map):** You can toggle the visibility of clinics, hospitals, and ambulances on and off to reduce map clutter.
-    """)
-    
-    st.info("💡 **Pro Tip:** If the system feels slow, it may be due to the OSRM routing API or the OpenAI API processing your request. Always ensure you have a stable internet connection.")
+    st.info("💡 **Pro Tip:** If the system feels slow, it may be due to external APIs (OSRM or OpenAI).")
