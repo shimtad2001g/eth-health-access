@@ -44,7 +44,7 @@ def get_route(orig_lon, orig_lat, dest_lon, dest_lat):
         st.error(f"Routing error: {e}")
     return None
 
-# --- MOCK DATABASES (In production, connect to PostgreSQL/Firebase) ---
+# --- MOCK DATABASES ---
 if 'hospital_db' not in st.session_state:
     st.session_state.hospital_db = {
         "Black Lion Hospital": {"beds": 5, "icu": 2, "coords": [9.0200, 38.7600]},
@@ -52,7 +52,6 @@ if 'hospital_db' not in st.session_state:
         "Zewditu Memorial": {"beds": 12, "icu": 1, "coords": [9.0100, 38.7500]}
     }
 
-# Ambulances now have real coordinates to calculate distance
 if 'ambulances' not in st.session_state:
     st.session_state.ambulances = [
         {"id": "AMB-01", "lat": 9.025, "lon": 38.755, "status": "Available"},
@@ -77,7 +76,7 @@ def load_data():
 
 gdf = load_data()
 
-# Haversine distance formula to find nearest ambulance
+# Haversine distance formula
 def haversine(lat1, lon1, lat2, lon2):
     R = 6371.0 
     lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
@@ -121,28 +120,21 @@ with tab1:
         if st.button("🚨 Dispatch Nearest Ambulance", type="primary"):
             with st.spinner("Calculating optimal route via OSRM..."):
                 
-                # 1. Find nearest available ambulance
                 available_ambs = [a for a in st.session_state.ambulances if a['status'] == 'Available']
                 if not available_ambs:
                     st.error("No ambulances available!")
                 else:
-                    # Sort by distance to clinic
                     available_ambs.sort(key=lambda a: haversine(a['lat'], a['lon'], c_lat, c_lon))
                     nearest_amb = available_ambs[0]
                     
-                    # 2. Find nearest hospital WITH BEDS
                     available_hospitals = [k for k, v in st.session_state.hospital_db.items() if v['beds'] > 0]
                     if available_hospitals:
                         assigned_hosp = available_hospitals[0]
                         
-                        # 3. Get Real Route from OSRM (Ambulance -> Clinic)
                         route = get_route(nearest_amb['lon'], nearest_amb['lat'], c_lon, c_lat)
                         
                         if route:
-                            # Save route to session state to draw on map
                             st.session_state.active_route = route['geometry']['coordinates']
-                            
-                            # Update Statuses
                             nearest_amb['status'] = f"En route to {assigned_hosp}"
                             st.session_state.hospital_db[assigned_hosp]['beds'] -= 1
                             
@@ -159,23 +151,49 @@ with tab1:
     with col2:
         m = folium.Map(location=[9.0116, 38.7878], zoom_start=12)
         
-        # Plot Clinics
+        # CREATE MAP LAYERS FOR TOGGLING
+        clinics_layer = folium.FeatureGroup(name="Clinics")
+        hospitals_layer = folium.FeatureGroup(name="Hospitals")
+        ambulances_layer = folium.FeatureGroup(name="Ambulances")
+        
+        # Plot Clinics (Small Blue Dots to prevent clutter)
         for _, row in clinics.iterrows():
-            folium.Marker([row.geometry.y, row.geometry.x], popup=row['Name'], icon=folium.Icon(color='blue', icon='user', prefix='fa')).add_to(m)
+            folium.CircleMarker(
+                [row.geometry.y, row.geometry.x], 
+                radius=3, 
+                color='blue', 
+                fill=True, 
+                fill_opacity=0.6, 
+                popup=row['Name']
+            ).add_to(clinics_layer)
             
         # Plot Hospitals
         for h_name, h_data in st.session_state.hospital_db.items():
             color = 'green' if h_data['beds'] > 0 else 'red'
-            folium.Marker(h_data['coords'], popup=f"{h_name} (Beds: {h_data['beds']})", icon=folium.Icon(color=color, icon='plus', prefix='fa')).add_to(m)
+            folium.Marker(
+                h_data['coords'], 
+                popup=f"{h_name} (Beds: {h_data['beds']})", 
+                icon=folium.Icon(color=color, icon='plus', prefix='fa')
+            ).add_to(hospitals_layer)
             
         # Plot Live Ambulances
         for amb in st.session_state.ambulances:
-            folium.Marker([amb['lat'], amb['lon']], popup=amb['id'], icon=folium.Icon(color='orange', icon='ambulance', prefix='fa')).add_to(m)
+            folium.Marker(
+                [amb['lat'], amb['lon']], 
+                popup=amb['id'], 
+                icon=folium.Icon(color='orange', icon='ambulance', prefix='fa')
+            ).add_to(ambulances_layer)
 
         # Draw Route if active
         if st.session_state.active_route:
             route_coords = [[lat, lon] for lon, lat in st.session_state.active_route]
             folium.PolyLine(route_coords, color="red", weight=5, opacity=0.8, tooltip="Active Route").add_to(m)
+
+        # Add layers to map and add control box
+        clinics_layer.add_to(m)
+        hospitals_layer.add_to(m)
+        ambulances_layer.add_to(m)
+        folium.LayerControl().add_to(m)
 
         st_folium(m, width="stretch", height=600)
 
@@ -202,7 +220,7 @@ with tab2:
             st.session_state.hospital_db[hosp_name]['icu'] = new_icu
             st.divider()
 
-# --- TAB 3: AI CLINICAL TRIAGE (LLM INTEGRATION) ---
+# --- TAB 3: AI CLINICAL TRIAGE ---
 with tab3:
     st.header("🧠 AI-Powered Triage & Decision Support")
     st.write("Uses OpenAI to analyze unstructured patient symptoms.")
