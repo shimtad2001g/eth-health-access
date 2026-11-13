@@ -3,3 +3,6 @@ geopandas
 folium
 streamlit-folium
 pandas
+numpy
+requests
+openai
