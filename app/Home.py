@@ -1,4 +1,3 @@
-$fullCode = @'
 import os
 import streamlit as st
 import geopandas as gpd
@@ -491,8 +490,3 @@ with tab4:
     """)
     
     st.info("💡 **Pro Tip:** If the system feels slow, it may be due to the OSRM routing API or the OpenAI API processing your request. Always ensure you have a stable internet connection.")
-'@
-
-Set-Content -Path app\Home.py -Value $fullCode -Encoding UTF8
-Write-Host "Code successfully written to app\Home.py!" -ForegroundColor Green
-notepad app\Home.py
