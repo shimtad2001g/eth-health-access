@@ -1,4 +1,4 @@
-﻿import os
+import os
 import streamlit as st
 import geopandas as gpd
 import folium
@@ -94,7 +94,7 @@ if os.path.exists("assets/logo.png"):
     st.logo("assets/logo.png", size="large")
     st.sidebar.image("assets/logo.png", width="stretch")
 else:
-    st.sidebar.warning("⚠️ Logo missing! Check assets/logo.png")
+    st.sidebar.warning("?? Logo missing! Check assets/logo.png")
 
 authenticator.logout('Logout', 'sidebar')
 st.sidebar.markdown("---")
@@ -159,10 +159,10 @@ def haversine(lat1, lon1, lat2, lon2):
 # ==========================================
 # UI LAYOUT
 # ==========================================
-st.title("🚑 EthioHealth Emergency Command Center")
+st.title("?? EthioHealth Emergency Command Center")
 st.write(f"Welcome, **{name}**!")
 
-tab1, tab2, tab3 = st.tabs(["📡 Dispatch Simulator", "🏥 Hospital Capacity", "🧠 AI Triage"])
+tab1, tab2, tab3 = st.tabs(["?? Dispatch Simulator", "?? Hospital Capacity", "?? AI Triage"])
 
 # --- TAB 1: DISPATCH SIMULATOR & FLEET ---
 with tab1:
@@ -170,12 +170,12 @@ with tab1:
     
     with col1:
         st.header("Dispatch Console")
-        st.subheader("📞 Caller Info")
+        st.subheader("?? Caller Info")
         caller_name = st.text_input("Caller Name:")
         caller_phone = st.text_input("Caller Phone:")
         
         st.markdown("---")
-        st.subheader("📍 Incident Location")
+        st.subheader("?? Incident Location")
         clinics = gdf[gdf['Type_Clean'] == 'Clinic'].copy()
         if not clinics.empty:
             selected_clinic = st.selectbox("Select Patient Location:", clinics['Name'].tolist())
@@ -184,7 +184,7 @@ with tab1:
             st.write(f"Coords: {c_lat:.4f}, {c_lon:.4f}")
         
         st.markdown("---")
-        if st.button("🚨 Dispatch Nearest Ambulance", type="primary"):
+        if st.button("?? Dispatch Nearest Ambulance", type="primary"):
             with st.spinner("Routing via OSRM..."):
                 available_ambs = [a for a in st.session_state.ambulances if a['status'] == 'Available']
                 if available_ambs:
@@ -224,7 +224,7 @@ with tab1:
         # --- IOT TELEMETRY SIMULATION ---
         if st.session_state.active_route and st.session_state.dispatched_amb:
             st.markdown("---")
-            st.subheader("📡 Live IoT Hardware Tracking")
+            st.subheader("?? Live IoT Hardware Tracking")
             
             # Auto-refresh the app every 3 seconds to simulate live data
             st_autorefresh(interval=3000, limit=None, key="iot_refresh")
@@ -275,7 +275,7 @@ with tab1:
 
 # --- TAB 2: HOSPITAL CAPACITY BOARD ---
 with tab2:
-    st.header("🏥 Real-Time Hospital Capacity Board")
+    st.header("?? Real-Time Hospital Capacity Board")
     
     for idx, (hosp_name, data) in enumerate(st.session_state.hospital_db.items()):
         with st.container():
@@ -286,15 +286,15 @@ with tab2:
             with col_b:
                 new_icu = st.number_input(f"Available ICU", min_value=0, value=data['icu'], key=f"icu_{hosp_name}")
             with col_c:
-                if new_beds > 0: st.success("🟢 Open")
-                else: st.error("🔴 Full")
+                if new_beds > 0: st.success("?? Open")
+                else: st.error("?? Full")
             
             st.session_state.hospital_db[hosp_name]['beds'] = new_beds
             st.session_state.hospital_db[hosp_name]['icu'] = new_icu
             st.divider()
             
     st.markdown("---")
-    st.subheader("📋 Recent Dispatch Logs (From Database)")
+    st.subheader("?? Recent Dispatch Logs (From Database)")
     
     # Query DB using SQLAlchemy
     logs = session.query(Dispatch).order_by(Dispatch.time.desc()).limit(10).all()
@@ -314,9 +314,9 @@ with tab2:
 
 # --- TAB 3: AI CLINICAL TRIAGE ---
 with tab3:
-    st.header("🧠 AI-Powered Triage & Decision Support")
+    st.header("?? AI-Powered Triage & Decision Support")
     if not openai_api_key:
-        st.warning("⚠️ Please enter your OpenAI API Key in the sidebar.")
+        st.warning("?? Please enter your OpenAI API Key in the sidebar.")
     
     with st.form("triage_form"):
         symptoms = st.text_area("Describe the primary complaint:")
