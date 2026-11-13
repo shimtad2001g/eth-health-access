@@ -6,3 +6,6 @@ pandas
 numpy
 requests
 openai
+streamlit-authenticator
+sqlalchemy
+streamlit-autorefresh
