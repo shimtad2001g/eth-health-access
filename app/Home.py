@@ -313,6 +313,18 @@ with tab1:
 
     with col2:
         m = folium.Map(location=[9.0116, 38.7878], zoom_start=12)
+        
+        # --- SATELLITE & MAP TILES ---
+        folium.TileLayer('OpenStreetMap', name='Street Map (Default)').add_to(m)
+        folium.TileLayer(
+            tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+            attr='Esri',
+            name='Satellite (High Resolution)',
+            overlay=False,
+            control=True
+        ).add_to(m)
+        
+        # --- DYNAMIC LAYERS ---
         clinics_layer = folium.FeatureGroup(name="Clinics")
         hospitals_layer = folium.FeatureGroup(name="Hospitals")
         ambulances_layer = folium.FeatureGroup(name="Ambulances")
@@ -461,3 +473,4 @@ with tab4:
     """)
     
     st.info("💡 **Pro Tip:** If the system feels slow, it may be due to the OSRM routing API or the OpenAI API processing your request. Always ensure you have a stable internet connection.")
+
