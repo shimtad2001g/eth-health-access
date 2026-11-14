@@ -247,7 +247,7 @@ def haversine(lat1, lon1, lat2, lon2):
 
 st.title("🚑 EthioHealth Emergency Command Center")
 st.write(f"{t('welcome')}, **{name}**!")
-tab1, tab2, tab3, tab4 = st.tabs([t("disp_tab"), t("cap_tab"), t("triage_tab"), t("help_tab")])
+tab1, tab2, tab3, tab4, tab5 = st.tabs([t("disp_tab"), t("cap_tab"), t("triage_tab"), t("help_tab")])
 
 with tab1:
     col1, col2 = st.columns([1, 3])
@@ -367,3 +367,43 @@ with tab4:
     st.markdown("Read the full manual for help.")
 
 
+
+# --- TAB 5: NATIONAL HEALTH ECOSYSTEM ---
+with tab5:
+    st.header("🌍 National Health Ecosystem")
+    st.markdown("Access Ethiopia's key open-source and cloud-based health platforms directly from this portal.")
+    st.markdown("---")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        with st.container(border=True):
+            st.subheader("📊 DHIS2 (National HMIS)")
+            st.caption("Ethiopia's national Health Management Information System for aggregate data, analytics, and reporting.")
+            st.markdown("[Open DHIS2 Portal](https://dhis2.org){:target='_blank'}")
+            
+        with st.container(border=True):
+            st.subheader("📝 OpenMRS (Electronic Medical Records)")
+            st.caption("Open-source EMR for patient-level data. Share detailed patient histories between facilities.")
+            st.markdown("[Open OpenMRS](https://openmrs.org){:target='_blank'} | [Try Demo](https://demo.openmrs.org){:target='_blank'}")
+            
+        with st.container(border=True):
+            st.subheader("🏥 Bahmni (Hospital Information System)")
+            st.caption("Comprehensive EMR & hospital management (billing, inventory) built on OpenMRS.")
+            st.markdown("[Open Bahmni](https://bahmni.org){:target='_blank'}")
+            
+    with col2:
+        with st.container(border=True):
+            st.subheader("🚑 Resgrid (Dispatch & First Responder)")
+            st.caption("Open-source Computer-Aided Dispatch (CAD) system for coordinating ambulance fleets and field personnel.")
+            st.markdown("[Open Resgrid](https://resgrid.com){:target='_blank'}")
+            
+        with st.container(border=True):
+            st.subheader("🔄 OpenHIM (Interoperability Layer)")
+            st.caption("Middleware that allows different health systems to communicate and share data securely.")
+            st.markdown("[Open OpenHIM](https://openhim.org){:target='_blank'}")
+            
+        with st.container(border=True):
+            st.subheader("🧪 OpenELIS (Laboratory Information)")
+            st.caption("Open-source lab management system for tracking test results and diagnostics.")
+            st.markdown("[Open OpenELIS](https://openelis.org){:target='_blank'}")
