@@ -417,22 +417,13 @@ with tab1:
             st.caption(f"Telemetry received. Ambulance is {st.session_state.sim_progress*100:.0f}% along the route.")
 
     with col2:
-        # Create the base map with NO default tiles
-        m = folium.Map(location=[9.0116, 38.7878], zoom_start=12, tiles=None)
+        # Create the base map (defaults to OpenStreetMap)
+        m = folium.Map(location=[9.0116, 38.7878], zoom_start=12)
         
-        # Explicitly add the Street Map layer
+        # Add Google Satellite Imagery Layer (Highly reliable)
         folium.TileLayer(
-            tiles='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            attr='OpenStreetMap',
-            name='Street Map',
-            overlay=False,
-            control=True
-        ).add_to(m)
-        
-        # Explicitly add the Satellite Imagery layer
-        folium.TileLayer(
-            tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-            attr='Esri',
+            tiles='https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+            attr='Google',
             name='Satellite Imagery',
             overlay=False,
             control=True
