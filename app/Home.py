@@ -41,6 +41,7 @@ TRANSLATIONS = {
     "English": {
         "disp_tab": "📡 Dispatch Simulator", "cap_tab": "🏥 Hospital Capacity",
         "triage_tab": "🧠 AI Triage", "help_tab": "❓ Help & Guide",
+        "pharm_tab": "💊 Pharmacy Finder",
         "caller_info": "📞 Caller Info", "caller_name": "Caller Name:",
         "caller_phone": "Caller Phone:", "incident_loc": "📍 Incident Location",
         "select_clinic": "Select Patient Location:", "dispatch_btn": "🚨 Dispatch Nearest Ambulance",
@@ -50,6 +51,7 @@ TRANSLATIONS = {
     "አማርኛ (Amharic)": {
         "disp_tab": "📡 የመላኪያ ማስመሰያ", "cap_tab": "🏥 የሆስፒታል አቅም",
         "triage_tab": "🧠 የAI ህክምና መለያ", "help_tab": "❓ እርዳታ እና መመሪያ",
+        "pharm_tab": "💊 የፋርማሲ ፈላጊ",
         "caller_info": "📞 የደዋይ መረጃ", "caller_name": "የደዋይ ስም:",
         "caller_phone": "የደዋይ ስልክ ቁጥር:", "incident_loc": "📍 የችግሩ ቦታ",
         "select_clinic": "የታካሚውን ቦታ ይምረጡ:", "dispatch_btn": "🚨 በቅርብ የሚገኝ አምቡላንስ ላክ",
@@ -59,6 +61,7 @@ TRANSLATIONS = {
     "Afaan Oromoo (Oromo)": {
         "disp_tab": "📡 Simulaatorii Ergaa", "cap_tab": "🏥 Dandeettii Hospitaalaa",
         "triage_tab": "🧠 AI Triage", "help_tab": "❓ Gargaarsa",
+        "pharm_tab": "💊 Barbaacha Qoricha",
         "caller_info": "📞 Odeeffannoo Bilbilaa", "caller_name": "Maqaa Bilbilaa:",
         "caller_phone": "Lakkoofsa Bilbilaa:", "incident_loc": "📍 Bakka Rakkoo",
         "select_clinic": "Bakka Dhukkubsataa Filadhu:", "dispatch_btn": "🚨 Ambulaansii Dhihoo Ergi",
@@ -68,6 +71,7 @@ TRANSLATIONS = {
     "ትግርኛ (Tigrinya)": {
         "disp_tab": "📡 መላኪያ ሲሙሌተር", "cap_tab": "🏥 ክእለት ሆስፒታል",
         "triage_tab": "🧠 AI Triage", "help_tab": "❓ ሓገዝ",
+        "pharm_tab": "💊 ደረስ መድሃኒት",
         "caller_info": "📞 ሓበሬታ ደዋይ", "caller_name": "ስም ደዋይ:",
         "caller_phone": "ቁጽሪ ስልኪ:", "incident_loc": "📍 ቦታ ጸገም",
         "select_clinic": "ቦታ ሕሙም ምረጽ:", "dispatch_btn": "🚨 ቀረባ ኣምቡላንስ ስደድ",
@@ -77,6 +81,7 @@ TRANSLATIONS = {
     "Somali": {
         "disp_tab": "📡 Simulator-ka Dirista", "cap_tab": "🏥 Awoodda Isbitaalka",
         "triage_tab": "🧠 AI Triage", "help_tab": "❓ Caawinaad",
+        "pharm_tab": "💊 Raadiyaha Farmashiyaha",
         "caller_info": "📞 Macluumaadka Wacayaasha", "caller_name": "Magaca Wacayaasha:",
         "caller_phone": "Lambarka Taleefanka:", "incident_loc": "📍 Goobta Dhacdada",
         "select_clinic": "Dooro Goobta Bukaanka:", "dispatch_btn": "🚨 Dir Ambulance-ka ugu dhow",
@@ -166,7 +171,6 @@ if os.path.exists("assets/logo.png"):
 selected_lang = st.sidebar.selectbox("🌐 Language / ቋንቋ", LANGUAGES, index=0)
 def t(key): return TRANSLATIONS[selected_lang].get(key, key)
 
-# --- RESTORED FULL ETHICAL DISCLAIMER ---
 with st.sidebar.expander("ℹ️ About the Developer"):
     st.markdown("""
     **Developed by:** Shimeles Tadesse Zelelew
@@ -243,7 +247,11 @@ if 'dispatched_amb' not in st.session_state: st.session_state.dispatched_amb = N
 @st.cache_data
 def load_data():
     try: return gpd.read_file('data/processed/facilities_addis.gpkg')
-    except: return gpd.GeoDataFrame({'Name': ["22 Mazoria Clinic", "Black Lion", "St. Paul's"], 'Type_Clean': ['Clinic', 'Hospital', 'Hospital'], 'geometry': gpd.points_from_xy([38.7878, 38.7600, 38.7700], [9.0116, 9.0200, 9.0300])})
+    except: return gpd.GeoDataFrame({
+        'Name': ["22 Mazoria Clinic", "Black Lion", "St. Paul's", "Zewditu Pharmacy", "Kenema Pharmacy"], 
+        'Type_Clean': ['Clinic', 'Hospital', 'Hospital', 'Pharmacy', 'Pharmacy'], 
+        'geometry': gpd.points_from_xy([38.7878, 38.7600, 38.7700, 38.7450, 38.7620], [9.0116, 9.0200, 9.0300, 9.0150, 9.0250])
+    })
 gdf = load_data()
 
 def haversine(lat1, lon1, lat2, lon2):
@@ -254,7 +262,8 @@ def haversine(lat1, lon1, lat2, lon2):
 st.title("🚑 EthioHealth Emergency Command Center")
 st.write(f"{t('welcome')}, **{name}**!")
 
-tab1, tab2, tab3, tab4 = st.tabs([t("disp_tab"), t("cap_tab"), t("triage_tab"), t("help_tab")])
+# 5 TABS
+tab1, tab2, tab3, tab4, tab5 = st.tabs([t("disp_tab"), t("cap_tab"), t("triage_tab"), t("pharm_tab"), t("help_tab")])
 
 with tab1:
     col1, col2 = st.columns([1, 3])
@@ -313,27 +322,25 @@ with tab1:
 
     with col2:
         m = folium.Map(location=[9.0116, 38.7878], zoom_start=12)
-        
-        # --- SATELLITE & MAP TILES ---
         folium.TileLayer('OpenStreetMap', name='Street Map (Default)').add_to(m)
-        folium.TileLayer(
-            tiles='https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
-            attr='Google',
-            name='Satellite (High Resolution)',
-            overlay=False,
-            control=True
-        ).add_to(m)
+        folium.TileLayer(tiles='https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', attr='Google', name='Satellite (High Resolution)').add_to(m)
         
-        # --- DYNAMIC LAYERS ---
         clinics_layer = folium.FeatureGroup(name="Clinics")
         hospitals_layer = folium.FeatureGroup(name="Hospitals")
+        pharmacies_layer = folium.FeatureGroup(name="Pharmacies")
         ambulances_layer = folium.FeatureGroup(name="Ambulances")
         
         for _, row in clinics.iterrows():
             folium.CircleMarker([row.geometry.y, row.geometry.x], radius=3, color='blue', fill=True, fill_opacity=0.6, popup=row['Name']).add_to(clinics_layer)
+            
         for h_name, h_data in st.session_state.hospital_db.items():
             color = 'green' if h_data['beds'] > 0 else 'red'
             folium.Marker(h_data['coords'], popup=f"{h_name} (Beds: {h_data['beds']})", icon=folium.Icon(color=color, icon='plus', prefix='fa')).add_to(hospitals_layer)
+            
+        pharmacies = gdf[gdf['Type_Clean'].str.contains('Pharmacy', case=False, na=False)]
+        for _, row in pharmacies.iterrows():
+            folium.Marker([row.geometry.y, row.geometry.x], popup=row['Name'], icon=folium.Icon(color='purple', icon='medkit', prefix='fa')).add_to(pharmacies_layer)
+
         for amb in st.session_state.ambulances:
             if amb['id'] != st.session_state.dispatched_amb:
                 folium.Marker([amb['lat'], amb['lon']], popup=amb['id'], icon=folium.Icon(color='orange', icon='ambulance', prefix='fa')).add_to(ambulances_layer)
@@ -344,7 +351,7 @@ with tab1:
             idx = int(st.session_state.sim_progress * (len(route_coords) - 1))
             folium.Marker(route_coords[idx], popup="LIVE GPS", icon=folium.Icon(color='red', icon='ambulance', prefix='fa')).add_to(m)
 
-        clinics_layer.add_to(m); hospitals_layer.add_to(m); ambulances_layer.add_to(m)
+        clinics_layer.add_to(m); hospitals_layer.add_to(m); pharmacies_layer.add_to(m); ambulances_layer.add_to(m)
         folium.LayerControl().add_to(m)
         st_folium(m, width="stretch", height=600)
 
@@ -368,7 +375,6 @@ with tab2:
 
 with tab3:
     st.header(t("triage_tab"))
-    
     st.markdown("""
     **What is AI Triage?**
     This tool uses Artificial Intelligence to analyze patient symptoms and instantly classify the emergency. It acts as a co-pilot for the dispatcher, helping to prioritize life-threatening cases immediately.
@@ -377,23 +383,17 @@ with tab3:
     🟡 **URGENT:** Needs medical attention soon.
     🟢 **NON-URGENT:** Advise clinic visit.
     """)
-    
     st.markdown("---")
-    
-    # Check for API key in secrets, otherwise ask user to provide one
     api_key = st.secrets.get("OPENAI_API_KEY", "")
-
     if not api_key:
         st.info("🔒 **System Notice:** The AI Triage engine is currently inactive. An administrator needs to connect the OpenAI API Key.")
-        st.markdown("*(If you are a developer or administrator testing this platform, you can enter a temporary key below to activate it for your session)*")
         api_key = st.text_input("Enter OpenAI API Key for this session:", type="password")
-
     if not api_key:
-        st.warning("⚠️ Please enter an API key above, or contact the system administrator to enable AI Triage.")
+        st.warning("⚠️ Please enter an API key above, or contact the system administrator.")
     else:
         client = OpenAI(api_key=api_key)
         with st.form("triage"):
-            symptoms = st.text_area("Describe the patient's symptoms (e.g., 'My father is sweating and holding his chest'):")
+            symptoms = st.text_area("Describe the patient's symptoms:")
             if st.form_submit_button("Analyze Symptoms with AI"):
                 with st.spinner("Analyzing..."):
                     try:
@@ -402,76 +402,59 @@ with tab3:
                             messages=[{"role": "user", "content": f"You are a medical dispatcher. Classify the emergency as CRITICAL (Red), URGENT (Yellow), or NON-URGENT (Green). Provide a 1-sentence reason. Symptoms: {symptoms}"}], 
                             max_tokens=50
                         ).choices[0].message.content
-                        
                         if "CRITICAL" in res: st.error(f"**AI Triage:** {res}")
                         elif "URGENT" in res: st.warning(f"**AI Triage:** {res}")
                         else: st.success(f"**AI Triage:** {res}")
                     except Exception as e:
                         st.error(f"AI Error: {e}")
 
+# --- TAB 4: PHARMACY FINDER ---
 with tab4:
+    st.header("💊 Pharmacy Finder")
+    st.markdown("Find the nearest pharmacy for medication refills or non-emergency health needs.")
+    
+    col_a, col_b = st.columns([1, 2])
+    with col_a:
+        clinics_list = gdf[gdf['Type_Clean'] == 'Clinic']['Name'].tolist()
+        if clinics_list:
+            search_location = st.selectbox("Find pharmacies near this clinic:", clinics_list)
+            loc_row = gdf[gdf['Name'] == search_location].iloc[0]
+            search_lat, search_lon = loc_row.geometry.y, loc_row.geometry.x
+            
+            if st.button("🔍 Find Nearest Pharmacies"):
+                pharmacies = gdf[gdf['Type_Clean'].str.contains('Pharmacy', case=False, na=False)].copy()
+                if not pharmacies.empty:
+                    pharmacies['dist_km'] = pharmacies.geometry.apply(lambda geom: haversine(search_lat, search_lon, geom.y, geom.x))
+                    pharmacies = pharmacies.sort_values('dist_km')
+                    
+                    st.success(f"Found {len(pharmacies)} pharmacies nearby!")
+                    for _, row in pharmacies.head(5).iterrows():
+                        st.write(f"**{row['Name']}** - {row['dist_km']:.2f} km away")
+                else:
+                    st.warning("No pharmacies found in the dataset.")
+    
+    with col_b:
+        st.info("💡 **Note:** Pharmacies are marked with purple medkit icons on the main map. Use the layer control to toggle them on/off.")
+
+with tab5:
     st.header(t("help_tab"))
-    st.markdown("Welcome to the **EthioHealth Emergency Command Center**. This guide explains every visible part of the platform to ensure you can save lives efficiently.")
-    
+    st.markdown("Welcome to the **EthioHealth Emergency Command Center**. This guide explains every visible part of the platform.")
     st.markdown("---")
-    st.subheader("1. Sidebar Navigation (Left Panel)")
-    st.markdown("""
-    *   **🌐 Language Selector:** Instantly translates the entire user interface into one of 15 Ethiopian languages.
-    *   **ℹ️ About the Developer:** Read about the system's creator, the ethical disclaimer, and a direct email link.
-    *   **OpenAI API Key:** Required to activate the AI Triage feature. *Note: The key is only stored in your browser session.*
-    *   **Logout:** Securely logs you out of the Command Center.
-    """)
-    
+    st.subheader("1. Sidebar Navigation")
+    st.markdown("*   **🌐 Language Selector:** Switch between 15 Ethiopian languages.\n*   **ℹ️ About the Developer:** View ethical disclaimers and patent status.\n*   **OpenAI API Key:** Required for AI Triage.\n*   **Logout:** Securely logs you out.")
     st.markdown("---")
     st.subheader("2. 📡 Dispatch Simulator Tab")
-    st.markdown("""
-    This is the core of the Command Center. It allows you to receive a call, locate the patient, and dispatch the nearest ambulance.
-    
-    *   **📞 Caller Info:** Enter the caller's name and phone number. This is permanently saved to the database.
-    *   **📍 Incident Location:** Select the clinic where the patient is located. The system automatically reads its GPS coordinates.
-    *   **🚨 Dispatch Nearest Ambulance Button:** 
-        *   Calculates the physical distance to find the **closest available ambulance**.
-        *   Queries the **OSRM routing engine** to find the fastest driving path on real roads.
-        *   Assigns the patient to the nearest hospital with available beds.
-        *   Triggers an **Audio Alert** (gTTS) and an **SMS Notification** (Twilio).
-    *   **📡 Live IoT Hardware Tracking:** Simulates real-time GPS telemetry, showing the red ambulance icon moving along the red route line on the map.
-    """)
-    
+    st.markdown("Enter caller info, select the incident location, and click Dispatch. The system calculates the Haversine distance to find the closest ambulance and uses the OSRM routing engine to find the fastest path.")
     st.markdown("---")
     st.subheader("3. 🏥 Hospital Capacity Tab")
-    st.markdown("""
-    This tab manages the real-time bed availability of the network's hospitals.
-    
-    *   **Available Beds / ICU:** You can manually adjust the number of available beds and ICU units. 
-    *   **Dynamic Status:** If beds drop to `0`, the hospital's marker on the map turns **Red** (Full), and the dispatch algorithm skips it. If you increase it above `0`, it turns **Green** (Open).
-    *   **📋 Dispatch Logs:** At the bottom, you can view the permanent database records of every dispatch, including time, caller, and destination.
-    """)
-    
+    st.markdown("Manage real-time bed availability. If beds drop to 0, the marker turns Red and the algorithm skips it.")
     st.markdown("---")
-    st.subheader("4. 🧠 AI Triage Tab")
-    st.markdown("""
-    **What is AI Triage?** 
-    Triage is the process of determining the priority of patients' treatments based on the severity of their condition. **AI Triage** uses Artificial Intelligence to automatically analyze unstructured patient symptoms and categorize the emergency.
-    
-    **Benefits:**
-    *   **Faster Response Times:** Critical patients are identified in milliseconds.
-    *   **Reduces Human Error:** The AI consistently checks for life-threatening keywords.
-    *   **Standardized Prioritization:** Ensures every caller is evaluated using the same protocols.
-    *   **Optimized Resource Allocation:** Saves ambulances for life-threatening cases (Red).
-    
-    **How to use it:** Type symptoms into the text box. The app sends the text to GPT-3.5, which classifies the emergency into 🔴 **CRITICAL**, 🟡 **URGENT**, or 🟢 **NON-URGENT**.
-    """)
-    
+    st.subheader("4. 💊 Pharmacy Finder Tab")
+    st.markdown("**What is this?** This tab allows dispatchers to find the nearest pharmacies for patients who need medication refills or non-emergency care.\n\n**How to use it:** Select a clinic location, and the system will calculate the distance to nearby pharmacies and list the top 5 closest options.")
     st.markdown("---")
-    st.subheader("5. The Map Interface")
-    st.markdown("""
-    *   **Blue Dots:** Represent clinics and health centers.
-    *   **Green/Red Crosses:** Represent hospitals (Green = Beds available, Red = Full).
-    *   **Orange Ambulances:** Represent the current positions of your active fleet.
-    *   **Red Line:** The active driving route calculated by OSRM.
-    *   **Layer Control (Top Right of Map):** Toggle the visibility of clinics, hospitals, and ambulances.
-    """)
-    
-    st.info("💡 **Pro Tip:** If the system feels slow, it may be due to the OSRM routing API or the OpenAI API processing your request. Always ensure you have a stable internet connection.")
-
-
+    st.subheader("5. 🧠 AI Triage Tab")
+    st.markdown("**What is AI Triage?** Triage is determining the priority of patients' treatments. AI Triage uses NLP to categorize the emergency.\n\n**Benefits:**\n*   Faster Response Times\n*   Reduces Human Error\n*   Standardized Prioritization\n*   Optimized Resource Allocation")
+    st.markdown("---")
+    st.subheader("6. The Map Interface")
+    st.markdown("*   **Blue Dots:** Clinics\n*   **Green/Red Crosses:** Hospitals (Green=Open, Red=Full)\n*   **Purple Medkits:** Pharmacies\n*   **Orange Ambulances:** Active fleet\n*   **Red Line:** Active driving route")
+    st.info("💡 **Pro Tip:** Use the Layer Control (top right of map) to toggle satellite imagery or filter specific facility types.")
