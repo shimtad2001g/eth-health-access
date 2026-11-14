@@ -26,130 +26,61 @@ st.set_page_config(
 # ==========================================
 # 1. INTERNATIONALIZATION (i18n) DICTIONARY
 # ==========================================
-# Expanded to the Top 15 languages of Ethiopia
 LANGUAGES = [
-    "English", 
-    "አማርኛ (Amharic)", 
-    "Afaan Oromoo (Oromo)", 
-    "ትግርኛ (Tigrinya)", 
-    "Somali", 
-    "Sidaamu Afoo (Sidama)", 
-    "Wolayttattuwa (Wolaytta)", 
-    "Gurage", 
-    "Qafar Af (Afar)", 
-    "Gamo",
-    "Hadiyyisa (Hadiyya)",
-    "Kambaatissa (Kembata)",
-    "Gedeoffa (Gedeo)",
-    "ስልጥኛ (Silt'e)",
-    "Kafinoonoo (Kafa)"
+    "English", "አማርኛ (Amharic)", "Afaan Oromoo (Oromo)", "ትግርኛ (Tigrinya)", 
+    "Somali", "Sidaamu Afoo (Sidama)", "Wolayttattuwa (Wolaytta)", 
+    "Gurage", "Qafar Af (Afar)", "Gamo", "Hadiyyisa (Hadiyya)",
+    "Kambaatissa (Kembata)", "Gedeoffa (Gedeo)", "ስልጥኛ (Silt'e)", "Kafinoonoo (Kafa)"
 ]
 
 TRANSLATIONS = {
     "English": {
-        "lang_select": "🌐 Select Language",
-        "disp_tab": "📡 Dispatch Simulator",
-        "cap_tab": "🏥 Hospital Capacity",
-        "triage_tab": "🧠 AI Triage",
-        "help_tab": "❓ Help & Guide",
-        "caller_info": "📞 Caller Info",
-        "caller_name": "Caller Name:",
-        "caller_phone": "Caller Phone:",
-        "incident_loc": "📍 Incident Location",
-        "select_clinic": "Select Patient Location:",
-        "dispatch_btn": "🚨 Dispatch Nearest Ambulance",
-        "fleet_status": "🚑 Fleet Status",
-        "welcome": "Welcome",
-        "logout": "Logout",
-        "demo_btn": "🚀 Start 48-Hour Free Demo",
-        "reg_title": "Register for 1-Month Trial",
-        "login": "Login",
-        "help_title": "❓ System User Guide & Help"
+        "lang_select": "🌐 Select Language", "disp_tab": "📡 Dispatch Simulator",
+        "cap_tab": "🏥 Hospital Capacity", "triage_tab": "🧠 AI Triage", "help_tab": "❓ Help & Guide",
+        "caller_info": "📞 Caller Info", "caller_name": "Caller Name:", "caller_phone": "Caller Phone:",
+        "incident_loc": "📍 Incident Location", "select_clinic": "Select Patient Location:",
+        "dispatch_btn": "🚨 Dispatch Nearest Ambulance", "fleet_status": "🚑 Fleet Status",
+        "welcome": "Welcome", "logout": "Logout", "demo_btn": "🚀 Start 48-Hour Free Demo",
+        "reg_title": "Register for 1-Month Trial", "login": "Login", "help_title": "❓ System User Guide & Help"
     },
     "አማርኛ (Amharic)": {
-        "lang_select": "🌐 ቋንቋ ይምረጡ",
-        "disp_tab": "📡 የመላኪያ ማስመሰያ",
-        "cap_tab": "🏥 የሆስፒታል አቅም",
-        "triage_tab": "🧠 የAI ህክምና መለያ",
-        "help_tab": "❓ እርዳታ እና መመሪያ",
-        "caller_info": "📞 የደዋይ መረጃ",
-        "caller_name": "የደዋይ ስም:",
-        "caller_phone": "የደዋይ ስልክ ቁጥር:",
-        "incident_loc": "📍 የችግሩ ቦታ",
-        "select_clinic": "የታካሚውን ቦታ ይምረጡ:",
-        "dispatch_btn": "🚨 በቅርብ የሚገኝ አምቡላንስ ላክ",
-        "fleet_status": "🚑 የአምቡላንስ ሁኔታ",
-        "welcome": "እንኳን ደህና መጡ",
-        "logout": "ውጣ",
-        "demo_btn": "🚀 የ48 ሰዓት ነፃ ማሳያ ጀምር",
-        "reg_title": "ለ1 ወር ሙከራ ይመዝገቡ",
-        "login": "ግባ",
-        "help_title": "❓ የስርዓቱ የተጠቃሚ መመሪያ እና እርዳታ"
+        "lang_select": "🌐 ቋንቋ ይምረጡ", "disp_tab": "📡 የመላኪያ ማስመሰያ", "cap_tab": "🏥 የሆስፒታል አቅም",
+        "triage_tab": "🧠 የAI ህክምና መለያ", "help_tab": "❓ እርዳታ እና መመሪያ", "caller_info": "📞 የደዋይ መረጃ",
+        "caller_name": "የደዋይ ስም:", "caller_phone": "የደዋይ ስልክ ቁጥር:", "incident_loc": "📍 የችግሩ ቦታ",
+        "select_clinic": "የታካሚውን ቦታ ይምረጡ:", "dispatch_btn": "🚨 በቅርብ የሚገኝ አምቡላንስ ላክ",
+        "fleet_status": "🚑 የአምቡላንስ ሁኔታ", "welcome": "እንኳን ደህና መጡ", "logout": "ውጣ",
+        "demo_btn": "🚀 የ48 ሰዓት ነፃ ማሳያ ጀምር", "reg_title": "ለ1 ወር ሙከራ ይመዝገቡ",
+        "login": "ግባ", "help_title": "❓ የስርዓቱ የተጠቃሚ መመሪያ እና እርዳታ"
     },
     "Afaan Oromoo (Oromo)": {
-        "lang_select": "🌐 Afaan Filadhu",
-        "disp_tab": "📡 Simulaatorii Ergaa",
-        "cap_tab": "🏥 Dandeettii Hospitaalaa",
-        "triage_tab": "🧠 AI Triage",
-        "help_tab": "❓ Gargaarsa",
-        "caller_info": "📞 Odeeffannoo Bilbilaa",
-        "caller_name": "Maqaa Bilbilaa:",
-        "caller_phone": "Lakkoofsa Bilbilaa:",
-        "incident_loc": "📍 Bakka Rakkoo",
-        "select_clinic": "Bakka Dhukkubsataa Filadhu:",
-        "dispatch_btn": "🚨 Ambulaansii Dhihoo Ergi",
-        "fleet_status": "🚑 Haala Ambulaansii",
-        "welcome": "Baga Nagaan Dhuftan",
-        "logout": "Ba'i",
-        "demo_btn": "🚀 Demo Sa'aatii 48 Horaa Jalqabi",
-        "reg_title": "Ji'a 1f Qormaataaf Galmaa'i",
-        "login": "Seeni",
-        "help_title": "❓ Qajeelfama Fayyadamaa"
+        "lang_select": "🌐 Afaan Filadhu", "disp_tab": "📡 Simulaatorii Ergaa", "cap_tab": "🏥 Dandeettii Hospitaalaa",
+        "triage_tab": "🧠 AI Triage", "help_tab": "❓ Gargaarsa", "caller_info": "📞 Odeeffannoo Bilbilaa",
+        "caller_name": "Maqaa Bilbilaa:", "caller_phone": "Lakkoofsa Bilbilaa:", "incident_loc": "📍 Bakka Rakkoo",
+        "select_clinic": "Bakka Dhukkubsataa Filadhu:", "dispatch_btn": "🚨 Ambulaansii Dhihoo Ergi",
+        "fleet_status": "🚑 Haala Ambulaansii", "welcome": "Baga Nagaan Dhuftan", "logout": "Ba'i",
+        "demo_btn": "🚀 Demo Sa'aatii 48 Horaa Jalqabi", "reg_title": "Ji'a 1f Qormaataaf Galmaa'i",
+        "login": "Seeni", "help_title": "❓ Qajeelfama Fayyadamaa"
     },
     "ትግርኛ (Tigrinya)": {
-        "lang_select": "🌐 ቋንቋ ምረጽ",
-        "disp_tab": "📡 መላኪያ ሲሙሌተር",
-        "cap_tab": "🏥 ክእለት ሆስፒታል",
-        "triage_tab": "🧠 AI Triage",
-        "help_tab": "❓ ሓገዝ",
-        "caller_info": "📞 ሓበሬታ ደዋይ",
-        "caller_name": "ስም ደዋይ:",
-        "caller_phone": "ቁጽሪ ስልኪ:",
-        "incident_loc": "📍 ቦታ ጸገም",
-        "select_clinic": "ቦታ ሕሙም ምረጽ:",
-        "dispatch_btn": "🚨 ቀረባ ኣምቡላንስ ስደድ",
-        "fleet_status": "🚑 ኩነታት ኣምቡላንስ",
-        "welcome": "እንቋዕ ብደሓን መጻእኩም",
-        "logout": "ውጻእ",
-        "demo_btn": "🚀 ናይ 48 ሰዓት ነጻ ሙከራ ጀምር",
-        "reg_title": "ን1 ወርሒ ፈተነ ተመዝገብ",
-        "login": "እቶ",
-        "help_title": "❓ መምርሒ ተጠቃሚ"
+        "lang_select": "🌐 ቋንቋ ምረጽ", "disp_tab": "📡 መላኪያ ሲሙሌተር", "cap_tab": "🏥 ክእለት ሆስፒታል",
+        "triage_tab": "🧠 AI Triage", "help_tab": "❓ ሓገዝ", "caller_info": "📞 ሓበሬታ ደዋይ",
+        "caller_name": "ስም ደዋይ:", "caller_phone": "ቁጽሪ ስልኪ:", "incident_loc": "📍 ቦታ ጸገም",
+        "select_clinic": "ቦታ ሕሙም ምረጽ:", "dispatch_btn": "🚨 ቀረባ ኣምቡላንስ ስደድ",
+        "fleet_status": "🚑 ኩነታት ኣምቡላንስ", "welcome": "እንቋዕ ብደሓን መጻእኩም", "logout": "ውጻእ",
+        "demo_btn": "🚀 ናይ 48 ሰዓት ነጻ ሙከራ ጀምር", "reg_title": "ን1 ወርሒ ፈተነ ተመዝገብ",
+        "login": "እቶ", "help_title": "❓ መምርሒ ተጠቃሚ"
     },
     "Somali": {
-        "lang_select": "🌐 Dooro Luuqadda",
-        "disp_tab": "📡 Simulator-ka Dirista",
-        "cap_tab": "🏥 Awoodda Isbitaalka",
-        "triage_tab": "🧠 AI Triage",
-        "help_tab": "❓ Caawinaad",
-        "caller_info": "📞 Macluumaadka Wacayaasha",
-        "caller_name": "Magaca Wacayaasha:",
-        "caller_phone": "Lambarka Taleefanka:",
-        "incident_loc": "📍 Goobta Dhacdada",
-        "select_clinic": "Dooro Goobta Bukaanka:",
-        "dispatch_btn": "🚨 Dir Ambulance-ka ugu dhow",
-        "fleet_status": "🚑 Xaaladda Ambulance-ka",
-        "welcome": "Ku soo dhawow",
-        "logout": "Ka bax",
-        "demo_btn": "🚀 Bilow 48-saacadood Demo Bilaash ah",
-        "reg_title": "Isku qor 1 Bilood Tijaabo",
-        "login": "Gal",
-        "help_title": "❓ Hagaha Isticmaalaha"
+        "lang_select": "🌐 Dooro Luuqadda", "disp_tab": "📡 Simulator-ka Dirista", "cap_tab": "🏥 Awoodda Isbitaalka",
+        "triage_tab": "🧠 AI Triage", "help_tab": "❓ Caawinaad", "caller_info": "📞 Macluumaadka Wacayaasha",
+        "caller_name": "Magaca Wacayaasha:", "caller_phone": "Lambarka Taleefanka:", "incident_loc": "📍 Goobta Dhacdada",
+        "select_clinic": "Dooro Goobta Bukaanka:", "dispatch_btn": "🚨 Dir Ambulance-ka ugu dhow",
+        "fleet_status": "🚑 Xaaladda Ambulance-ka", "welcome": "Ku soo dhawow", "logout": "Ka bax",
+        "demo_btn": "🚀 Bilow 48-saacadood Demo Bilaash ah", "reg_title": "Isku qor 1 Bilood Tijaabo",
+        "login": "Gal", "help_title": "❓ Hagaha Isticmaalaha"
     }
 }
 
-# Fallback for remaining 10 languages to English (so the app doesn't break)
-# You can easily replace these English strings with native translations in the future.
 for lang in LANGUAGES:
     if lang not in TRANSLATIONS:
         TRANSLATIONS[lang] = TRANSLATIONS["English"]
@@ -205,10 +136,8 @@ if os.path.exists("assets/logo.png"):
 else:
     st.sidebar.warning("⚠️ Logo missing! Check assets/logo.png")
 
-# Language Selector (Default to English, index 0)
 selected_lang = st.sidebar.selectbox("🌐 Language / ቋንቋ", LANGUAGES, index=0)
 
-# Translation function
 def t(key):
     return TRANSLATIONS[selected_lang].get(key, key)
 
@@ -237,12 +166,10 @@ demo_mode = False
 time_remaining = None
 is_dev = False
 
-# 👑 SECRET DEVELOPER BACKDOOR 👑
 if "dev_access" in query_params and query_params["dev_access"] == "shimeles_admin_2026":
     is_dev = True
     demo_mode = False
 
-# 48-Hour Demo Logic
 if not is_dev and query_params.get("demo") == "true" and query_params.get("start"):
     try:
         start_time = datetime.fromisoformat(query_params.get("start"))
@@ -256,7 +183,6 @@ if not is_dev and query_params.get("demo") == "true" and query_params.get("start
     except:
         st.query_params.clear()
 
-# Standard Login
 if not demo_mode and not is_dev:
     authenticator.login(location='main', fields={'Form name': t("login")})
     
@@ -313,7 +239,6 @@ else:
     name = st.session_state.get('name')
     authenticator.logout(t("logout"), 'sidebar')
 
-# Check Trial Expiration
 if not demo_mode and not is_dev and not st.session_state.get('authentication_status') == False:
     user_key = st.session_state.get('username')
     user_data = config['credentials']['usernames'].get(user_key)
@@ -379,7 +304,9 @@ def haversine(lat1, lon1, lat2, lon2):
 st.title("🚑 EthioHealth Emergency Command Center")
 st.write(f"{t('welcome')}, **{name}**!")
 
-tab1, tab2, tab3, tab4 = st.tabs([t("disp_tab"), t("cap_tab"), t("triage_tab"), t("help_tab")])
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    t("disp_tab"), t("cap_tab"), t("triage_tab"), t("help_tab"), "🌐 Health Ecosystem"
+])
 
 with tab1:
     col1, col2 = st.columns([1, 3])
@@ -565,3 +492,44 @@ with tab4:
     st.markdown("**What is AI Triage?** Triage is determining the priority of patients' treatments based on severity. AI Triage uses Natural Language Processing to automatically categorize the emergency.\n\n**Benefits:**\n*   Faster Response Times\n*   Reduces Human Error\n*   Standardized Prioritization\n*   Optimized Resource Allocation")
     
     st.info("💡 **Pro Tip:** If the system feels slow, it may be due to external APIs (OSRM or OpenAI).")
+
+# --- TAB 5: HEALTH ECOSYSTEM ---
+with tab5:
+    st.header("🌐 National Health Ecosystem")
+    st.markdown("Access Ethiopia's key open-source and cloud-based health platforms directly from this portal.")
+
+    st.markdown("---")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        with st.container(border=True):
+            st.subheader("📊 DHIS2 (National HMIS)")
+            st.caption("Ethiopia's national Health Management Information System for aggregate data, analytics, and reporting.")
+            st.markdown("[🔗 Open DHIS2 Portal](https://dhis236.moh.gov.et)")
+
+        with st.container(border=True):
+            st.subheader("📋 OpenMRS (Electronic Medical Records)")
+            st.caption("Open-source EMR for patient-level data. Share detailed patient histories between facilities.")
+            st.markdown("[🔗 Open OpenMRS](https://openmrs.org/) | [🚀 Try Demo](https://demo.openmrs.org/openmrs)")
+
+        with st.container(border=True):
+            st.subheader("🏥 Bahmni (Hospital Information System)")
+            st.caption("Comprehensive EMR & hospital management (billing, inventory) built on OpenMRS.")
+            st.markdown("[🔗 Open Bahmni](https://www.bahmni.org/)")
+
+    with col2:
+        with st.container(border=True):
+            st.subheader("🚑 Resgrid (Dispatch & First Responder)")
+            st.caption("Open-source Computer-Aided Dispatch (CAD) system for coordinating ambulance fleets and field personnel.")
+            st.markdown("[🔗 Open Resgrid](https://resgrid.com/)")
+
+        with st.container(border=True):
+            st.subheader("🔗 OpenHIM (Interoperability Layer)")
+            st.caption("Middleware that allows different health systems to communicate and share data securely.")
+            st.markdown("[🔗 Open OpenHIM](http://openhim.org/)")
+
+        with st.container(border=True):
+            st.subheader("🧪 OpenELIS (Laboratory Information)")
+            st.caption("Open-source lab management system for tracking test results and diagnostics.")
+            st.markdown("[🔗 Open OpenELIS](https://openelis.org/)")
