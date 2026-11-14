@@ -86,8 +86,6 @@ TRANSLATIONS = {
 for lang in LANGUAGES:
     if lang not in TRANSLATIONS: TRANSLATIONS[lang] = TRANSLATIONS["English"]
 
-def t(key): return TRANSLATIONS[selected_lang].get(key, key)
-
 # ==========================================
 # 2. CONFIG, DATABASE & SECRETS
 # ==========================================
@@ -166,6 +164,9 @@ if os.path.exists("assets/logo.png"):
     st.sidebar.image("assets/logo.png", width="stretch")
 
 selected_lang = st.sidebar.selectbox("🌐 Language / ቋንቋ", LANGUAGES, index=0)
+
+# Translation function
+def t(key): return TRANSLATIONS[selected_lang].get(key, key)
 
 with st.sidebar.expander("ℹ️ About the Developer"):
     st.markdown("**Developed by:** Shimeles Tadesse Zelelew\n**Status:** Prototype / Not Patented yet.")
@@ -336,8 +337,11 @@ with tab2:
         with st.container():
             st.subheader(h_name)
             c1, c2 = st.columns(2)
-            with c1: st.session_state.hospital_db[h_name]['beds'] = st.number_input(f"Available Beds", min_value=0, value=h_data['beds'], key=f"b_{h_name}")
-            with c2: st.success("🟢 Open") if h_data['beds'] > 0 else st.error("🔴 Full")
+            with c1: 
+                st.session_state.hospital_db[h_name]['beds'] = st.number_input(f"Available Beds", min_value=0, value=h_data['beds'], key=f"b_{h_name}")
+            with c2:
+                if h_data['beds'] > 0: st.success("🟢 Open")
+                else: st.error("🔴 Full")
             st.divider()
     st.subheader("📋 Recent Dispatch Logs")
     if not demo_mode:
