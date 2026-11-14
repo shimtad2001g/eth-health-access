@@ -213,7 +213,7 @@ elif demo_mode: st.warning(f"⚠️ DEMO MODE - {str(time_remaining).split('.')[
 else: name = st.session_state.get('name'); authenticator.logout(t("logout"), 'sidebar')
 
 # ==========================================
-# 5. APP LOGIC (OSRM, MAP, etc.)
+# 5. APP LOGIC
 # ==========================================
 OSRM_URL = "http://router.project-osrm.org/route/v1/driving/"
 def get_route(o_lon, o_lat, d_lon, d_lat):
@@ -245,7 +245,6 @@ def haversine(lat1, lon1, lat2, lon2):
 st.title("🚑 EthioHealth Emergency Command Center")
 st.write(f"{t('welcome')}, **{name}**!")
 
-# 4 TABS
 tab1, tab2, tab3, tab4 = st.tabs([t("disp_tab"), t("cap_tab"), t("triage_tab"), t("help_tab")])
 
 with tab1:
@@ -337,10 +336,8 @@ with tab2:
             with c1: 
                 st.session_state.hospital_db[h_name]['beds'] = st.number_input(f"Available Beds", min_value=0, value=h_data['beds'], key=f"b_{h_name}")
             with c2:
-                if h_data['beds'] > 0:
-                    st.success("🟢 Open")
-                else:
-                    st.error("🔴 Full")
+                if h_data['beds'] > 0: st.success("🟢 Open")
+                else: st.error("🔴 Full")
             st.divider()
     st.subheader("📋 Recent Dispatch Logs")
     if not demo_mode:
@@ -394,7 +391,7 @@ with tab4:
     This tab manages the real-time bed availability of the network's hospitals.
     
     *   **Available Beds / ICU:** You can manually adjust the number of available beds and ICU units. 
-    *   **Dynamic Status:** If beds drop to , the hospital's marker on the map turns **Red** (Full), and the dispatch algorithm skips it. If you increase it above , it turns **Green** (Open).
+    *   **Dynamic Status:** If beds drop to `0`, the hospital's marker on the map turns **Red** (Full), and the dispatch algorithm skips it. If you increase it above `0`, it turns **Green** (Open).
     *   **📋 Dispatch Logs:** At the bottom, you can view the permanent database records of every dispatch, including time, caller, and destination.
     """)
     
@@ -424,4 +421,3 @@ with tab4:
     """)
     
     st.info("💡 **Pro Tip:** If the system feels slow, it may be due to the OSRM routing API or the OpenAI API processing your request. Always ensure you have a stable internet connection.")
-
