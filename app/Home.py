@@ -41,6 +41,7 @@ class MapLegend(MacroElement):
                         <h4 style="margin-top: 0; margin-bottom: 5px; font-family: sans-serif;">Map Legend</h4>
                         <div style="font-size: 12px; line-height: 1.8; font-family: sans-serif; color: #333;">
                             <span style="display:inline-block; width: 15px; text-align: center; color: blue;"><i class="fa fa-user"></i></span> Clinic<br>
+                            <span style="display:inline-block; width: 15px; text-align: center; color: purple;"><i class="fa fa-medkit"></i></span> Pharmacy<br>
                             <span style="display:inline-block; width: 15px; text-align: center; color: green;"><i class="fa fa-plus"></i></span> Hospital (Beds Available)<br>
                             <span style="display:inline-block; width: 15px; text-align: center; color: red;"><i class="fa fa-plus"></i></span> Hospital (Full)<br>
                             <span style="display:inline-block; width: 15px; text-align: center; color: orange;"><i class="fa fa-ambulance"></i></span> Ambulance (Idle)<br>
@@ -160,11 +161,10 @@ class Dispatch(Base):
     hospital = Column(String)
     time = Column(DateTime, default=datetime.utcnow)
 
-# Try/Except block prevents crash if table already exists
 try:
     Base.metadata.create_all(engine)
 except Exception as e:
-    pass # Table already exists, safely ignore
+    pass 
 
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -325,12 +325,21 @@ if 'dispatched_amb' not in st.session_state: st.session_state.dispatched_amb = N
 @st.cache_data
 def load_data():
     try:
-        return gpd.read_file('data/processed/facilities_addis.gpkg')
+        gdf = gpd.read_file('data/processed/facilities_addis.gpkg')
+        # Ensure we have a pharmacy category for testing if it doesn't exist
+        if 'Pharmacy' not in gdf['Type_Clean'].unique():
+            mock_pharmacy = gpd.GeoDataFrame({
+                'Name': ["Mock Pharmacy 1", "Mock Pharmacy 2"],
+                'Type_Clean': ['Pharmacy', 'Pharmacy'],
+                'geometry': gpd.points_from_xy([38.7800, 38.7950], [9.0150, 9.0250])
+            })
+            gdf = pd.concat([gdf, mock_pharmacy], ignore_index=True)
+        return gdf
     except:
         return gpd.GeoDataFrame({
-            'Name': ["22 Mazoria Clinic", "Black Lion Hospital", "St. Paul's Hospital"],
-            'Type_Clean': ['Clinic', 'Hospital', 'Hospital'],
-            'geometry': gpd.points_from_xy([38.7878, 38.7600, 38.7700], [9.0116, 9.0200, 9.0300])
+            'Name': ["22 Mazoria Clinic", "Black Lion Hospital", "St. Paul's Hospital", "Mock Pharmacy"],
+            'Type_Clean': ['Clinic', 'Hospital', 'Hospital', 'Pharmacy'],
+            'geometry': gpd.points_from_xy([38.7878, 38.7600, 38.7700, 38.7900], [9.0116, 9.0200, 9.0300, 9.0150])
         })
 
 gdf = load_data()
@@ -420,7 +429,7 @@ with tab1:
         # Create the base map (defaults to OpenStreetMap)
         m = folium.Map(location=[9.0116, 38.7878], zoom_start=12)
         
-        # Add Google Satellite Imagery Layer (Highly reliable)
+        # Add Google Satellite Imagery Layer
         folium.TileLayer(
             tiles='https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
             attr='Google',
@@ -430,16 +439,29 @@ with tab1:
         ).add_to(m)
         
         clinics_layer = folium.FeatureGroup(name="Clinics")
+        pharmacies_layer = folium.FeatureGroup(name="Pharmacies")
         hospitals_layer = folium.FeatureGroup(name="Hospitals")
         ambulances_layer = folium.FeatureGroup(name="Ambulances")
         
+        # Plot Clinics
         for _, row in clinics.iterrows():
             folium.CircleMarker([row.geometry.y, row.geometry.x], radius=3, color='blue', fill=True, fill_opacity=0.6, popup=row['Name']).add_to(clinics_layer)
             
+        # Plot Pharmacies
+        pharmacies = gdf[gdf['Type_Clean'] == 'Pharmacy'].copy()
+        for _, row in pharmacies.iterrows():
+            folium.Marker(
+                [row.geometry.y, row.geometry.x], 
+                popup=row['Name'], 
+                icon=folium.Icon(color='purple', icon='medkit', prefix='fa')
+            ).add_to(pharmacies_layer)
+            
+        # Plot Hospitals
         for h_name, h_data in st.session_state.hospital_db.items():
             color = 'green' if h_data['beds'] > 0 else 'red'
             folium.Marker(h_data['coords'], popup=f"{h_name} (Beds: {h_data['beds']})", icon=folium.Icon(color=color, icon='plus', prefix='fa')).add_to(hospitals_layer)
             
+        # Plot Ambulances
         for amb in st.session_state.ambulances:
             if amb['id'] == st.session_state.dispatched_amb and st.session_state.active_route:
                 continue 
@@ -456,10 +478,11 @@ with tab1:
             folium.Marker(current_pos, popup=f"LIVE GPS: {st.session_state.dispatched_amb}", icon=folium.Icon(color='red', icon='ambulance', prefix='fa')).add_to(m)
 
         clinics_layer.add_to(m)
+        pharmacies_layer.add_to(m)
         hospitals_layer.add_to(m)
         ambulances_layer.add_to(m)
         
-        # Add LayerControl to toggle between Street Map and Satellite
+        # Add LayerControl to toggle between Street Map, Satellite, and data layers
         folium.LayerControl().add_to(m)
         
         # Add the Dynamic Legend to the Map
