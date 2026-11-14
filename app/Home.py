@@ -166,6 +166,7 @@ if os.path.exists("assets/logo.png"):
 selected_lang = st.sidebar.selectbox("🌐 Language / ቋንቋ", LANGUAGES, index=0)
 def t(key): return TRANSLATIONS[selected_lang].get(key, key)
 
+# --- RESTORED FULL ETHICAL DISCLAIMER ---
 with st.sidebar.expander("ℹ️ About the Developer"):
     st.markdown("""
     **Developed by:** Shimeles Tadesse Zelelew
@@ -460,5 +461,3 @@ with tab4:
     """)
     
     st.info("💡 **Pro Tip:** If the system feels slow, it may be due to the OSRM routing API or the OpenAI API processing your request. Always ensure you have a stable internet connection.")
-
-
