@@ -167,7 +167,15 @@ selected_lang = st.sidebar.selectbox("🌐 Language / ቋንቋ", LANGUAGES, ind
 def t(key): return TRANSLATIONS[selected_lang].get(key, key)
 
 with st.sidebar.expander("ℹ️ About the Developer"):
-    st.markdown("**Developed by:** Shimeles Tadesse Zelelew\n**Status:** Prototype / Not Patented yet.")
+    st.markdown("""
+    **Developed by:** Shimeles Tadesse Zelelew
+    
+    **Status:** Prototype / Not Patented yet.
+    
+    *Disclaimer: This is a pilot system. Do not use for actual emergency dispatch until fully certified and registered by the Ministry of Health.*
+    
+    *Ethical Use: This platform is designed to save lives by optimizing emergency dispatch. Any misuse or unauthorized deployment is strictly prohibited.*
+    """)
     st.markdown("[📧 Email Me](mailto:shimeles.tadesse@example.com)")
 
 authenticator = stauth.Authenticate(config['credentials'], config['cookie']['name'], config['cookie']['key'], config['cookie']['expiry_days'])
@@ -421,3 +429,4 @@ with tab4:
     """)
     
     st.info("💡 **Pro Tip:** If the system feels slow, it may be due to the OSRM routing API or the OpenAI API processing your request. Always ensure you have a stable internet connection.")
+
