@@ -394,7 +394,7 @@ with tab4:
     This tab manages the real-time bed availability of the network's hospitals.
     
     *   **Available Beds / ICU:** You can manually adjust the number of available beds and ICU units. 
-    *   **Dynamic Status:** If beds drop to  , the hospital's marker on the map turns **Red** (Full), and the dispatch algorithm skips it. If you increase it above  , it turns **Green** (Open).
+    *   **Dynamic Status:** If beds drop to , the hospital's marker on the map turns **Red** (Full), and the dispatch algorithm skips it. If you increase it above , it turns **Green** (Open).
     *   **📋 Dispatch Logs:** At the bottom, you can view the permanent database records of every dispatch, including time, caller, and destination.
     """)
     
