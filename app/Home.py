@@ -15,6 +15,7 @@ import streamlit_authenticator as stauth
 from streamlit_autorefresh import st_autorefresh
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, Float
 from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.pool import NullPool
 from datetime import datetime, timedelta
 from gtts import gTTS
 from twilio.rest import Client
@@ -27,7 +28,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# 1. INTERNATIONALIZATION (i18n) DICTIONARY
+# 1. INTERNATIONALIZATION (i18n)
 # ==========================================
 LANGUAGES = [
     "English", "አማርኛ (Amharic)", "Afaan Oromoo (Oromo)", "ትግርኛ (Tigrinya)", 
@@ -87,7 +88,7 @@ for lang in LANGUAGES:
     if lang not in TRANSLATIONS: TRANSLATIONS[lang] = TRANSLATIONS["English"]
 
 # ==========================================
-# 2. CONFIG, DATABASE & SECRETS
+# 2. CONFIG & DB
 # ==========================================
 if not os.path.exists('config.yaml'):
     hashed_password = stauth.Hasher.hash('password123')
@@ -99,17 +100,15 @@ if not os.path.exists('config.yaml'):
 
 with open('config.yaml') as file: config = yaml.load(file, Loader=SafeLoader)
 
-# Safely load secrets
 try:
     DATABASE_URL = st.secrets["SUPABASE_DB_URL"]
     TWILIO_SID = st.secrets["TWILIO_ACCOUNT_SID"]
     TWILIO_TOKEN = st.secrets["TWILIO_AUTH_TOKEN"]
     TWILIO_FROM = st.secrets["TWILIO_FROM_NUMBER"]
 except (KeyError, FileNotFoundError):
-    DATABASE_URL = "sqlite:///ethio_health.db" # Fallback
+    DATABASE_URL = "sqlite:///ethio_health.db"
     TWILIO_SID, TWILIO_TOKEN, TWILIO_FROM = None, None, None
 
-from sqlalchemy.pool import NullPool
 engine = create_engine(DATABASE_URL, poolclass=NullPool)
 Base = declarative_base()
 
@@ -130,7 +129,7 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 # ==========================================
-# 3. HELPER FUNCTIONS (gTTS & Twilio)
+# 3. HELPERS
 # ==========================================
 def play_dispatch_alert(language_name, eta_minutes):
     lang_map = {"English": "en", "አማርኛ (Amharic)": "am", "Afaan Oromoo (Oromo)": "om", "ትግርኛ (Tigrinya)": "ti", "Somali": "so"}
@@ -158,15 +157,13 @@ def send_dispatch_sms(to_number, ambulance_id, hospital_name, eta_minutes):
         return None
 
 # ==========================================
-# 4. SIDEBAR & AUTHENTICATION
+# 4. SIDEBAR & AUTH
 # ==========================================
 if os.path.exists("assets/logo.png"):
     st.logo("assets/logo.png", size="large")
     st.sidebar.image("assets/logo.png", width="stretch")
 
 selected_lang = st.sidebar.selectbox("🌐 Language / ቋንቋ", LANGUAGES, index=0)
-
-# Translation function
 def t(key): return TRANSLATIONS[selected_lang].get(key, key)
 
 with st.sidebar.expander("ℹ️ About the Developer"):
@@ -247,7 +244,9 @@ def haversine(lat1, lon1, lat2, lon2):
 
 st.title("🚑 EthioHealth Emergency Command Center")
 st.write(f"{t('welcome')}, **{name}**!")
-tab1, tab2, tab3, tab4, tab5 = st.tabs([t("disp_tab"), t("cap_tab"), t("triage_tab"), t("help_tab")])
+
+# 4 TABS
+tab1, tab2, tab3, tab4 = st.tabs([t("disp_tab"), t("cap_tab"), t("triage_tab"), t("help_tab")])
 
 with tab1:
     col1, col2 = st.columns([1, 3])
@@ -285,12 +284,9 @@ with tab1:
                             st.session_state.hospital_db[assigned_hosp]['beds'] -= 1
                             eta = route['duration'] / 60
                             
-                            # 1. Audio Alert
                             play_dispatch_alert(selected_lang, eta)
-                            # 2. SMS Alert
                             if caller_phone: 
                                 if send_dispatch_sms(caller_phone, nearest_amb['id'], assigned_hosp, eta): st.caption("SMS Sent!")
-                            # 3. DB Log
                             if not demo_mode:
                                 session.add(Dispatch(caller_name=caller_name, caller_phone=caller_phone, clinic=selected_clinic, ambulance=nearest_amb['id'], hospital=assigned_hosp, eta_minutes=eta))
                                 session.commit()
@@ -341,8 +337,10 @@ with tab2:
             with c1: 
                 st.session_state.hospital_db[h_name]['beds'] = st.number_input(f"Available Beds", min_value=0, value=h_data['beds'], key=f"b_{h_name}")
             with c2:
-                if h_data['beds'] > 0: st.success("🟢 Open")
-                else: st.error("🔴 Full")
+                if h_data['beds'] > 0:
+                    st.success("🟢 Open")
+                else:
+                    st.error("🔴 Full")
             st.divider()
     st.subheader("📋 Recent Dispatch Logs")
     if not demo_mode:
@@ -365,45 +363,3 @@ with tab3:
 with tab4:
     st.header(t("help_tab"))
     st.markdown("Read the full manual for help.")
-
-
-
-# --- TAB 5: NATIONAL HEALTH ECOSYSTEM ---
-with tab5:
-    st.header("🌍 National Health Ecosystem")
-    st.markdown("Access Ethiopia's key open-source and cloud-based health platforms directly from this portal.")
-    st.markdown("---")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        with st.container(border=True):
-            st.subheader("📊 DHIS2 (National HMIS)")
-            st.caption("Ethiopia's national Health Management Information System for aggregate data, analytics, and reporting.")
-            st.markdown("[Open DHIS2 Portal](https://dhis2.org){:target='_blank'}")
-            
-        with st.container(border=True):
-            st.subheader("📝 OpenMRS (Electronic Medical Records)")
-            st.caption("Open-source EMR for patient-level data. Share detailed patient histories between facilities.")
-            st.markdown("[Open OpenMRS](https://openmrs.org){:target='_blank'} | [Try Demo](https://demo.openmrs.org){:target='_blank'}")
-            
-        with st.container(border=True):
-            st.subheader("🏥 Bahmni (Hospital Information System)")
-            st.caption("Comprehensive EMR & hospital management (billing, inventory) built on OpenMRS.")
-            st.markdown("[Open Bahmni](https://bahmni.org){:target='_blank'}")
-            
-    with col2:
-        with st.container(border=True):
-            st.subheader("🚑 Resgrid (Dispatch & First Responder)")
-            st.caption("Open-source Computer-Aided Dispatch (CAD) system for coordinating ambulance fleets and field personnel.")
-            st.markdown("[Open Resgrid](https://resgrid.com){:target='_blank'}")
-            
-        with st.container(border=True):
-            st.subheader("🔄 OpenHIM (Interoperability Layer)")
-            st.caption("Middleware that allows different health systems to communicate and share data securely.")
-            st.markdown("[Open OpenHIM](https://openhim.org){:target='_blank'}")
-            
-        with st.container(border=True):
-            st.subheader("🧪 OpenELIS (Laboratory Information)")
-            st.caption("Open-source lab management system for tracking test results and diagnostics.")
-            st.markdown("[Open OpenELIS](https://openelis.org){:target='_blank'}")
