@@ -109,7 +109,8 @@ except (KeyError, FileNotFoundError):
     DATABASE_URL = "sqlite:///ethio_health.db" # Fallback
     TWILIO_SID, TWILIO_TOKEN, TWILIO_FROM = None, None, None
 
-engine = create_engine(DATABASE_URL, pool_pre_ping=True, pool_recycle=3600)
+from sqlalchemy.pool import NullPool
+engine = create_engine(DATABASE_URL, poolclass=NullPool)
 Base = declarative_base()
 
 class Dispatch(Base):
@@ -364,4 +365,5 @@ with tab3:
 with tab4:
     st.header(t("help_tab"))
     st.markdown("Read the full manual for help.")
+
 
