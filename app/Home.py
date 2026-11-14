@@ -160,7 +160,12 @@ class Dispatch(Base):
     hospital = Column(String)
     time = Column(DateTime, default=datetime.utcnow)
 
-Base.metadata.create_all(engine)
+# Try/Except block prevents crash if table already exists
+try:
+    Base.metadata.create_all(engine)
+except Exception as e:
+    pass # Table already exists, safely ignore
+
 Session = sessionmaker(bind=engine)
 session = Session()
 
@@ -412,17 +417,8 @@ with tab1:
             st.caption(f"Telemetry received. Ambulance is {st.session_state.sim_progress*100:.0f}% along the route.")
 
     with col2:
-        # Create the base map WITHOUT default tiles first
-        m = folium.Map(location=[9.0116, 38.7878], zoom_start=12, tiles=None)
-        
-        # Add Standard Street Map Layer
-        folium.TileLayer(
-            tiles='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            attr='OpenStreetMap',
-            name='Street Map',
-            overlay=False,
-            control=True
-        ).add_to(m)
+        # Create the base map (defaults to OpenStreetMap)
+        m = folium.Map(location=[9.0116, 38.7878], zoom_start=12)
         
         # Add Satellite Imagery Layer
         folium.TileLayer(
