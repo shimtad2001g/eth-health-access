@@ -317,8 +317,8 @@ with tab1:
         # --- SATELLITE & MAP TILES ---
         folium.TileLayer('OpenStreetMap', name='Street Map (Default)').add_to(m)
         folium.TileLayer(
-            tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-            attr='Esri',
+            tiles='https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+            attr='Google',
             name='Satellite (High Resolution)',
             overlay=False,
             control=True
@@ -473,4 +473,5 @@ with tab4:
     """)
     
     st.info("💡 **Pro Tip:** If the system feels slow, it may be due to the OSRM routing API or the OpenAI API processing your request. Always ensure you have a stable internet connection.")
+
 
