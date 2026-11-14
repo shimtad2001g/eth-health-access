@@ -364,3 +364,4 @@ with tab3:
 with tab4:
     st.header(t("help_tab"))
     st.markdown("Read the full manual for help.")
+
