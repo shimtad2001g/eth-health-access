@@ -362,4 +362,66 @@ with tab3:
 
 with tab4:
     st.header(t("help_tab"))
-    st.markdown("Read the full manual for help.")
+    st.markdown("Welcome to the **EthioHealth Emergency Command Center**. This guide explains every visible part of the platform to ensure you can save lives efficiently.")
+    
+    st.markdown("---")
+    st.subheader("1. Sidebar Navigation (Left Panel)")
+    st.markdown("""
+    *   **🌐 Language Selector:** Instantly translates the entire user interface into one of 15 Ethiopian languages.
+    *   **ℹ️ About the Developer:** Read about the system's creator, the ethical disclaimer, and a direct email link.
+    *   **OpenAI API Key:** Required to activate the AI Triage feature. *Note: The key is only stored in your browser session.*
+    *   **Logout:** Securely logs you out of the Command Center.
+    """)
+    
+    st.markdown("---")
+    st.subheader("2. 📡 Dispatch Simulator Tab")
+    st.markdown("""
+    This is the core of the Command Center. It allows you to receive a call, locate the patient, and dispatch the nearest ambulance.
+    
+    *   **📞 Caller Info:** Enter the caller's name and phone number. This is permanently saved to the database.
+    *   **📍 Incident Location:** Select the clinic where the patient is located. The system automatically reads its GPS coordinates.
+    *   **🚨 Dispatch Nearest Ambulance Button:** 
+        *   Calculates the physical distance to find the **closest available ambulance**.
+        *   Queries the **OSRM routing engine** to find the fastest driving path on real roads.
+        *   Assigns the patient to the nearest hospital with available beds.
+        *   Triggers an **Audio Alert** (gTTS) and an **SMS Notification** (Twilio).
+    *   **📡 Live IoT Hardware Tracking:** Simulates real-time GPS telemetry, showing the red ambulance icon moving along the red route line on the map.
+    """)
+    
+    st.markdown("---")
+    st.subheader("3. 🏥 Hospital Capacity Tab")
+    st.markdown("""
+    This tab manages the real-time bed availability of the network's hospitals.
+    
+    *   **Available Beds / ICU:** You can manually adjust the number of available beds and ICU units. 
+    *   **Dynamic Status:** If beds drop to  , the hospital's marker on the map turns **Red** (Full), and the dispatch algorithm skips it. If you increase it above  , it turns **Green** (Open).
+    *   **📋 Dispatch Logs:** At the bottom, you can view the permanent database records of every dispatch, including time, caller, and destination.
+    """)
+    
+    st.markdown("---")
+    st.subheader("4. 🧠 AI Triage Tab")
+    st.markdown("""
+    **What is AI Triage?** 
+    Triage is the process of determining the priority of patients' treatments based on the severity of their condition. **AI Triage** uses Artificial Intelligence to automatically analyze unstructured patient symptoms and categorize the emergency.
+    
+    **Benefits:**
+    *   **Faster Response Times:** Critical patients are identified in milliseconds.
+    *   **Reduces Human Error:** The AI consistently checks for life-threatening keywords.
+    *   **Standardized Prioritization:** Ensures every caller is evaluated using the same protocols.
+    *   **Optimized Resource Allocation:** Saves ambulances for life-threatening cases (Red).
+    
+    **How to use it:** Type symptoms into the text box. The app sends the text to GPT-3.5, which classifies the emergency into 🔴 **CRITICAL**, 🟡 **URGENT**, or 🟢 **NON-URGENT**.
+    """)
+    
+    st.markdown("---")
+    st.subheader("5. The Map Interface")
+    st.markdown("""
+    *   **Blue Dots:** Represent clinics and health centers.
+    *   **Green/Red Crosses:** Represent hospitals (Green = Beds available, Red = Full).
+    *   **Orange Ambulances:** Represent the current positions of your active fleet.
+    *   **Red Line:** The active driving route calculated by OSRM.
+    *   **Layer Control (Top Right of Map):** Toggle the visibility of clinics, hospitals, and ambulances.
+    """)
+    
+    st.info("💡 **Pro Tip:** If the system feels slow, it may be due to the OSRM routing API or the OpenAI API processing your request. Always ensure you have a stable internet connection.")
+
