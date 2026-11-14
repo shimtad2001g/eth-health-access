@@ -412,14 +412,23 @@ with tab1:
             st.caption(f"Telemetry received. Ambulance is {st.session_state.sim_progress*100:.0f}% along the route.")
 
     with col2:
-        # Create the base map
-        m = folium.Map(location=[9.0116, 38.7878], zoom_start=12)
+        # Create the base map WITHOUT default tiles first
+        m = folium.Map(location=[9.0116, 38.7878], zoom_start=12, tiles=None)
         
-        # ADD THE SATELLITE TILE LAYER HERE
+        # Add Standard Street Map Layer
+        folium.TileLayer(
+            tiles='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            attr='OpenStreetMap',
+            name='Street Map',
+            overlay=False,
+            control=True
+        ).add_to(m)
+        
+        # Add Satellite Imagery Layer
         folium.TileLayer(
             tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
             attr='Esri',
-            name='Satellite',
+            name='Satellite Imagery',
             overlay=False,
             control=True
         ).add_to(m)
@@ -454,7 +463,7 @@ with tab1:
         hospitals_layer.add_to(m)
         ambulances_layer.add_to(m)
         
-        # This LayerControl will now include the Satellite toggle
+        # Add LayerControl to toggle between Street Map and Satellite
         folium.LayerControl().add_to(m)
         
         # Add the Dynamic Legend to the Map
