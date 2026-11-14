@@ -355,15 +355,46 @@ with tab2:
 
 with tab3:
     st.header(t("triage_tab"))
-    if not st.secrets.get("OPENAI_API_KEY"):
-        st.warning("Add OPENAI_API_KEY to Streamlit Secrets to use this.")
+    
+    st.markdown("""
+    **What is AI Triage?**
+    This tool uses Artificial Intelligence to analyze patient symptoms and instantly classify the emergency. It acts as a co-pilot for the dispatcher, helping to prioritize life-threatening cases immediately.
+    
+    🔴 **CRITICAL:** Immediate dispatch required.
+    🟡 **URGENT:** Needs medical attention soon.
+    🟢 **NON-URGENT:** Advise clinic visit.
+    """)
+    
+    st.markdown("---")
+    
+    # Check for API key in secrets, otherwise ask user to provide one
+    api_key = st.secrets.get("OPENAI_API_KEY", "")
+
+    if not api_key:
+        st.info("🔒 **System Notice:** The AI Triage engine is currently inactive. An administrator needs to connect the OpenAI API Key.")
+        st.markdown("*(If you are a developer or administrator testing this platform, you can enter a temporary key below to activate it for your session)*")
+        api_key = st.text_input("Enter OpenAI API Key for this session:", type="password")
+
+    if not api_key:
+        st.warning("⚠️ Please enter an API key above, or contact the system administrator to enable AI Triage.")
     else:
-        client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+        client = OpenAI(api_key=api_key)
         with st.form("triage"):
-            symptoms = st.text_area("Symptoms:")
-            if st.form_submit_button("Analyze"):
-                res = client.chat.completions.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": f"Classify as CRITICAL, URGENT, or NON-URGENT: {symptoms}"}], max_tokens=20).choices[0].message.content
-                st.info(res)
+            symptoms = st.text_area("Describe the patient's symptoms (e.g., 'My father is sweating and holding his chest'):")
+            if st.form_submit_button("Analyze Symptoms with AI"):
+                with st.spinner("Analyzing..."):
+                    try:
+                        res = client.chat.completions.create(
+                            model="gpt-3.5-turbo", 
+                            messages=[{"role": "user", "content": f"You are a medical dispatcher. Classify the emergency as CRITICAL (Red), URGENT (Yellow), or NON-URGENT (Green). Provide a 1-sentence reason. Symptoms: {symptoms}"}], 
+                            max_tokens=50
+                        ).choices[0].message.content
+                        
+                        if "CRITICAL" in res: st.error(f"**AI Triage:** {res}")
+                        elif "URGENT" in res: st.warning(f"**AI Triage:** {res}")
+                        else: st.success(f"**AI Triage:** {res}")
+                    except Exception as e:
+                        st.error(f"AI Error: {e}")
 
 with tab4:
     st.header(t("help_tab"))
@@ -429,4 +460,5 @@ with tab4:
     """)
     
     st.info("💡 **Pro Tip:** If the system feels slow, it may be due to the OSRM routing API or the OpenAI API processing your request. Always ensure you have a stable internet connection.")
+
 
