@@ -412,7 +412,17 @@ with tab1:
             st.caption(f"Telemetry received. Ambulance is {st.session_state.sim_progress*100:.0f}% along the route.")
 
     with col2:
+        # Create the base map
         m = folium.Map(location=[9.0116, 38.7878], zoom_start=12)
+        
+        # ADD THE SATELLITE TILE LAYER HERE
+        folium.TileLayer(
+            tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+            attr='Esri',
+            name='Satellite',
+            overlay=False,
+            control=True
+        ).add_to(m)
         
         clinics_layer = folium.FeatureGroup(name="Clinics")
         hospitals_layer = folium.FeatureGroup(name="Hospitals")
@@ -443,6 +453,8 @@ with tab1:
         clinics_layer.add_to(m)
         hospitals_layer.add_to(m)
         ambulances_layer.add_to(m)
+        
+        # This LayerControl will now include the Satellite toggle
         folium.LayerControl().add_to(m)
         
         # Add the Dynamic Legend to the Map
